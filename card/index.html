@@ -81,10 +81,18 @@ h2{font:800 22px/1.2 var(--display);margin:0}
 .topbar .rankline{margin-left:auto;color:var(--muted)}
 .arena{position:relative;min-height:0}
 .felt{position:absolute;left:6%;right:6%;top:12%;bottom:8%;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,var(--felt-hi),var(--felt) 70%);border:12px solid var(--felt-rim);box-shadow:inset 0 0 40px rgb(0 0 0 / .35),0 10px 30px rgb(0 0 0 / .2)}
-.seat{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:4px;width:120px;text-align:center}
+.seat{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:4px;width:max-content;min-width:120px;text-align:center}
+.fan{position:relative;margin-top:2px}
+.fan .card{position:absolute;top:0}
+.fan .card .face{box-shadow:0 1px 2px rgb(0 0 0 / .3)}
+.fan .card .badge{right:auto;left:.12em;top:.12em}
+.fan .card .mark{top:auto;bottom:.2em;left:.2em}
+#table.watching .dock{display:none}
+.flying{position:fixed;left:0;top:0;z-index:40;pointer-events:none;will-change:transform;transform-origin:0 0}
 .seat .avatar{width:46px;height:46px;font-size:18px;box-shadow:0 0 0 3px var(--bg)}
 .seat .nm{font:700 14px/1.15 var(--body);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .seat .cnt{display:inline-flex;align-items:center;gap:5px;font:600 12.5px/1 var(--body);color:var(--muted);font-variant-numeric:tabular-nums}
+.seat .nm,.seat .cnt{background:var(--bg);padding:2px 9px;border-radius:999px}
 .seat .cnt i{width:10px;height:14px;border-radius:2px;background:repeating-linear-gradient(45deg,var(--back1) 0 2px,var(--back2) 2px 4px);display:inline-block}
 .seat.turn .avatar{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--accent),0 0 18px 6px rgb(240 154 69 / .55);animation:pulse 1.4s ease-in-out infinite}
 .seat.away{opacity:.4}
@@ -238,7 +246,7 @@ const PHOTOS = {"Agnes Radvanyi": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAYA
 const BOSS = "Darin Khalil";
 const LEADS = new Set(["Timea Kiss","Emilia Hubai-Nagy","Matteo Anedda","Brigitta Varadi-Rahima","Anita Hideg","Oumaima Abbessi","Liliana Tunde Nagy","Sara Shaltout"]);
 const SUPA_URL = "https://xytrkcqbcynqpdaypbwt.supabase.co", SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5dHJrY3FiY3lucXBkYXlwYnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0OTQ2MjIsImV4cCI6MjEwMDA3MDYyMn0.01tpWKIrYZY3m2XM4fy76dw2dh7Cf5_1mr8Qejl30F8";
-const ROOM = "ras-card-clash-953de639";   // each build gets its own channel, so old open pages never mix with a new version
+const ROOM = "ras-card-clash-d768fe4e";   // each build gets its own channel, so old open pages never mix with a new version
 
 /* ---------- Card ranking ---------- */
 const shown = n => n.replace(/\s+\(.*?\)/, "");
@@ -431,13 +439,20 @@ function cardEl(c, cw){
   el.setAttribute("aria-label", shown(n) + (t === 2 ? ", top card" : t === 1 ? ", team lead" : ""));
   return el;
 }
+function backEl(){
+  const el = document.createElement("div"); el.className = "card";
+  el.innerHTML = `<div class="face back"></div>`;
+  return el;
+}
 function avatarEl(name){
   const a = document.createElement("span"); a.className = "avatar";
   a.style.setProperty("--hue", hueOf(name)); a.textContent = (name.trim()[0] || "?").toUpperCase();
   return a;
 }
-let lastPileKey = "";
+let lastPileKey = "", animUntil = 0, renderTimer = 0, dealtGame = 0, flownKey = "";
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 function render(){
+  if (Date.now() < animUntil){ clearTimeout(renderTimer); renderTimer = setTimeout(render, animUntil - Date.now() + 30); return; }
   const joined = !!ME.name;
   $("screen-name").hidden = joined;
   if (!joined) return;
@@ -475,6 +490,14 @@ function renderLobby(){
 }
 function renderTable(){
   const seated = S.seats.includes(ME.id);
+  // where did the newly played card come from? (read from the previous render before it is replaced)
+  const playKey = S.pile && S.last && (S.last.type === "play" || S.last.type === "win") ? S.pile.c + ":" + S.pile.by + ":" + S.seq : "";
+  let flyFrom = null;
+  if (playKey && playKey !== flownKey && !reduceMotion()){
+    const src = document.querySelector(`#arena .fan [data-c="${S.pile.c}"], #hand [data-c="${S.pile.c}"]`) || document.querySelector(`#arena .seat[data-id="${S.pile.by}"] .avatar`);
+    if (src) flyFrom = src.getBoundingClientRect();
+  }
+  flownKey = playKey || flownKey;
   // seats around the rim, in play order, with me at the bottom (or everyone around if watching)
   const arena = $("arena");
   arena.querySelectorAll(".seat").forEach(s => s.remove());
@@ -483,13 +506,24 @@ function renderTable(){
   order.forEach((id, i) => {
     const t = seated ? (n === 1 ? .5 : i / (n - 1)) : i / n;
     const ang = seated ? Math.PI * (1.12 - 1.24 * t) : Math.PI * (1.5 - 2 * t);
-    const x = 50 + 45 * Math.cos(ang), y = 52 - 42 * Math.sin(ang);
+    const x = 50 + 45 * Math.cos(ang), y = seated ? 52 - 42 * Math.sin(ang) : 47 - 37 * Math.sin(ang);
     const s = document.createElement("div");
     s.className = "seat" + (S.turn === id && S.phase === "playing" ? " turn" : "") + (present(id) ? "" : " away");
+    s.dataset.id = id;
     s.style.left = x + "%"; s.style.top = y + "%";
     const nm = document.createElement("div"); nm.className = "nm"; nm.textContent = nameOf(id);
     const cnt = document.createElement("div"); cnt.className = "cnt"; cnt.innerHTML = "<i></i>"; cnt.append(`${S.hands[id].length} left`);
     s.append(avatarEl(nameOf(id)), nm, cnt);
+    // the player's cards spread beside the seat: face up for spectators (and at the end), backs for players
+    const cards = S.hands[id], faceUp = !seated || S.phase === "over";
+    if (cards.length){
+      const fcw = faceUp ? (seated ? 34 : 50) : 24, maxW = faceUp ? (seated ? 220 : 300) : 120, k = cards.length;
+      const step = k > 1 ? Math.min(fcw * (faceUp ? .62 : .42), (maxW - fcw) / (k - 1)) : 0;
+      const fan = document.createElement("div"); fan.className = "fan";
+      fan.style.width = (fcw + step * (k - 1)) + "px"; fan.style.height = fcw * 1.4 + "px"; fan.style.setProperty("--cw", fcw + "px");
+      cards.forEach((c, j) => { const el = faceUp ? cardEl(c) : backEl(); el.dataset.c = c; el.style.left = j * step + "px"; fan.append(el); });
+      s.append(fan);
+    }
     if (S.phase === "playing" && S.passed.includes(id)){ const b = document.createElement("span"); b.className = "bubble"; b.textContent = "Pass"; s.append(b); }
     if (!present(id)){ const b = document.createElement("span"); b.className = "bubble"; b.textContent = "Away"; s.append(b); }
     arena.append(s);
@@ -505,6 +539,7 @@ function renderTable(){
       const top = cardEl(S.pile.c); top.classList.add("top"); wrap.append(top);
       const by = document.createElement("div"); by.className = "by"; by.textContent = `played by ${S.pile.by === ME.id ? "you" : nameOf(S.pile.by)}`;
       center.append(wrap, by);
+      if (flyFrom){ top.style.animation = "none"; requestAnimationFrame(() => flyCard(cardEl(S.pile.c), flyFrom, top, 480)); animUntil = Date.now() + 520; }
     } else {
       const h = document.createElement("div"); h.className = "hintline";
       h.textContent = S.phase === "over" ? "" : `New round. ${S.turn === ME.id ? "You lead" : nameOf(S.turn) + " leads"} with any card.`;
@@ -513,11 +548,16 @@ function renderTable(){
   }
   // status
   const mine = S.phase === "playing" && S.turn === ME.id;
-  $("status").textContent = S.phase === "over" ? "Game over" : mine ? (S.pile ? "Your turn: beat the card or pass" : "Your turn: lead any card") : `Waiting for ${nameOf(S.turn)}…`;
+  $("status").textContent = S.phase === "over" ? "Game over" : mine ? (S.pile ? "Your turn: beat the card or pass" : "Your turn: lead any card") : (seated ? "" : "Watching · you’ll be dealt in next game · ") + `Waiting for ${nameOf(S.turn)}…`;
+  $("table").classList.toggle("watching", !seated);
   $("status").classList.toggle("mine", mine);
   // my hand
   $("hand").hidden = !seated; $("actions").hidden = !seated; $("spect").hidden = seated;
   if (seated) renderHand(mine);
+  if (S.game !== dealtGame){
+    dealtGame = S.game;
+    if (S.last && S.last.type === "deal" && !reduceMotion()) dealAnimation();
+  }
   // game over
   $("over").hidden = S.phase !== "over";
   if (S.phase === "over"){
@@ -547,6 +587,42 @@ function renderHand(mine){
   });
   $("playBtn").disabled = !(mine && selected !== null && beats(selected, S.pile));
   $("passBtn").disabled = !(mine && S.pile);
+}
+
+/* ---------- Card flights ---------- */
+// Fly `clone` (a card element) from rect `from` onto element `target`, revealing the target when it lands.
+function flyCard(clone, from, target, ms, flip){
+  const to = target.getBoundingClientRect();
+  const w = to.width || 60;
+  clone.classList.add("flying"); clone.style.setProperty("--cw", w + "px");
+  document.body.append(clone);
+  const s0 = from.width / w;
+  target.style.visibility = "hidden";
+  const a = clone.animate([
+    {transform: `translate(${from.left}px,${from.top}px) scale(${s0})`},
+    {transform: `translate(${(from.left + to.left) / 2}px,${Math.min(from.top, to.top) - 40}px) scale(${(s0 + 1) / 2 * 1.08}) rotate(-6deg)`, offset: .55},
+    {transform: `translate(${to.left}px,${to.top}px) scale(1)`}
+  ], {duration: ms, easing: "cubic-bezier(.45,.05,.3,1)", fill: "forwards"});
+  a.finished.then(() => {
+    target.style.visibility = "";
+    if (flip) target.animate([{transform: "rotateY(90deg)"}, {transform: "none"}], {duration: 220, easing: "ease-out"});
+    clone.remove();
+  }).catch(() => clone.remove());
+}
+// Deal: one face-down deck in the middle, cards fly round-robin to every seat (and into my hand, turning face up).
+function dealAnimation(){
+  const center = $("center").getBoundingClientRect();
+  const deckW = 70, from = {left: center.left + center.width / 2 - deckW / 2, top: center.top + center.height / 2 - deckW * .7, width: deckW};
+  const slots = {};
+  S.seats.forEach(id => {
+    slots[id] = id === ME.id ? [...document.querySelectorAll("#hand .card")] : [...document.querySelectorAll(`#arena .seat[data-id="${id}"] .fan .card`)];
+  });
+  const order = [];
+  for (let k = 0; k < 27; k++) S.seats.forEach(id => { if (slots[id][k]) order.push(slots[id][k]); });
+  order.forEach(el => el.style.visibility = "hidden");
+  const gap = Math.max(28, Math.min(55, 2400 / order.length));
+  order.forEach((el, i) => setTimeout(() => flyCard(backEl(), from, el, 420, el.closest("#hand") || !el.querySelector(".back")), i * gap));
+  animUntil = Date.now() + order.length * gap + 520;
 }
 
 /* ---------- Announcements ---------- */
