@@ -14,7 +14,7 @@
 /* Layout: roster of face-up playing cards; on shuffle a full-screen card table takes over: one deck in the middle, then one row per group (name on the left, cards fanned to the right). */
 :root{
   --bg:#eceee9; --surface:#fafaf7; --ink:#1c2320; --muted:#5b665f; --line:#d3d8d1;
-  --accent:#1CABE2; --accent-text:#0a7aa8; --accent-ink:#04263a; --on-g:#ffffff;
+  --accent:#b85f16; --accent-text:#b85f16; --accent-ink:#ffffff; --on-g:#ffffff;
   --card:#fffdf8; --card-ink:#1c2320; --card-line:#e2ddd2; --back1:#1CABE2; --back2:#47bfea; --back-label:#0a7aa8;
   --g-l:0.6; --g-c:0.15; --tint-l:0.94; --tint-c:0.045;
   --shadow:0 1px 2px rgb(20 30 25 / .08), 0 6px 18px rgb(20 30 25 / .07);
@@ -25,7 +25,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#111513; --surface:#1a201d; --ink:#e7ebe5; --muted:#99a59d; --line:#2c3531;
-    --accent:#1CABE2; --accent-text:#5ccbf2; --accent-ink:#04263a; --on-g:#111513;
+    --accent:#f09a45; --accent-text:#f09a45; --accent-ink:#1d1307; --on-g:#111513;
     --card:#f6f3ea; --card-ink:#1c2320; --card-line:#d8d2c4; --back1:#1599cb; --back2:#36b4e3; --back-label:#0a7aa8;
     --g-l:0.72; --g-c:0.14; --tint-l:0.28; --tint-c:0.05;
     --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 22px rgb(0 0 0 / .35);
@@ -35,7 +35,7 @@
 }
 :root[data-theme="dark"]{
   --bg:#111513; --surface:#1a201d; --ink:#e7ebe5; --muted:#99a59d; --line:#2c3531;
-  --accent:#1CABE2; --accent-text:#5ccbf2; --accent-ink:#04263a; --on-g:#111513;
+  --accent:#f09a45; --accent-text:#f09a45; --accent-ink:#1d1307; --on-g:#111513;
   --card:#f6f3ea; --card-ink:#1c2320; --card-line:#d8d2c4; --back1:#1599cb; --back2:#36b4e3; --back-label:#0a7aa8;
   --g-l:0.72; --g-c:0.14; --tint-l:0.28; --tint-c:0.05;
   --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 22px rgb(0 0 0 / .35);
@@ -84,7 +84,7 @@ h1{font:800 clamp(34px,5.5vw,60px)/1.02 var(--display);letter-spacing:-.02em;mar
 .card.down .inner{transform:rotateY(180deg)}
 .face{position:absolute;inset:0;border-radius:.75em;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;box-shadow:var(--card-shadow)}
 /* Player-card face: full photo inside a wide frame (gold in the roster, group colour once dealt), slanted name plate, round initial badge. */
-.card{--frame:#1CABE2;--frame-hi:#8ad8f4;--frame-lo:#0b7fb0}
+.card{--frame:#c99a34;--frame-hi:#f2d98c;--frame-lo:#94701f}
 .table .card{--frame:var(--gc);--frame-hi:color-mix(in oklch,var(--gc),white 35%);--frame-lo:color-mix(in oklch,var(--gc),black 25%)}
 .front{background:linear-gradient(135deg,var(--frame-hi),var(--frame) 45%,var(--frame-lo));transition:background .4s ease}
 .pic{position:absolute;inset:.42em;border-radius:.42em;overflow:hidden;background:#d9d4c8}
@@ -146,7 +146,7 @@ body.presenting .peek::after{content:"";position:absolute;left:26px;right:26px;t
 
 
 <header class="top wrap">
-  <div class="eyebrow">UNICEF · RAS Team Retreat · Wed 25 Nov 2026</div>
+  <div class="eyebrow">RAS Team Retreat · Wed 25 Nov 2026</div>
   <h1>Who’s in your group?</h1>
 </header>
 
