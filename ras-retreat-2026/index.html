@@ -110,6 +110,11 @@ h1{font:800 clamp(34px,5.5vw,60px)/1.02 var(--display);letter-spacing:-.02em;mar
 @media (prefers-reduced-motion: reduce){
   .table .card[data-name="Darin Khalil"] .front,.table .card[data-name="Darin Khalil"] .front::before,.table .card[data-name="Darin Khalil"] .front::after{animation:none}
 }
+/* Silver sweep: team leads' cards get a slower light sweep and a faint silver edge once dealt. */
+.table .card:is([data-name="Timea Kiss"],[data-name="Emilia Hubai-Nagy"],[data-name="Matteo Anedda"],[data-name="Brigitta Varadi-Rahima"],[data-name="Anita Hideg"],[data-name="Oumaima Abbessi"],[data-name="Liliana Tunde Nagy"],[data-name="Sara Shaltout"]):not(.down) .front{box-shadow:var(--card-shadow),0 0 0 .08em rgb(232 238 246 / .95),0 0 .6em .05em rgb(220 230 246 / .45)}
+.table .card:is([data-name="Timea Kiss"],[data-name="Emilia Hubai-Nagy"],[data-name="Matteo Anedda"],[data-name="Brigitta Varadi-Rahima"],[data-name="Anita Hideg"],[data-name="Oumaima Abbessi"],[data-name="Liliana Tunde Nagy"],[data-name="Sara Shaltout"]):not(.down) .front::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;background:linear-gradient(105deg,transparent 40%,rgb(255 255 255 / .6) 50%,transparent 60%);background-size:300% 100%;background-repeat:no-repeat;mix-blend-mode:soft-light;animation:silverSweep 5s ease-in-out infinite}
+@keyframes silverSweep{0%{background-position:130% 0}35%,100%{background-position:-30% 0}}
+@media (prefers-reduced-motion: reduce){ .table .card:is([data-name="Timea Kiss"],[data-name="Emilia Hubai-Nagy"],[data-name="Matteo Anedda"],[data-name="Brigitta Varadi-Rahima"],[data-name="Anita Hideg"],[data-name="Oumaima Abbessi"],[data-name="Liliana Tunde Nagy"],[data-name="Sara Shaltout"]):not(.down) .front::after{animation:none;opacity:0} }
 .card.absent{opacity:.42;filter:grayscale(1)}
 .card.absent::after{content:"Absent";position:absolute;left:8%;right:8%;top:40%;padding:.2em 0;transform:rotate(-14deg);border:.14em solid #b3261e;border-radius:.3em;color:#b3261e;background:rgb(255 255 255 / .85);text-align:center;font:800 .95em/1.2 var(--display);letter-spacing:.12em;text-transform:uppercase}
 
