@@ -121,9 +121,9 @@ legend{padding:0;margin-bottom:6px;font:600 14px/1.3 var(--body);color:var(--sof
 <script>
 const SUPA_URL = "https://xytrkcqbcynqpdaypbwt.supabase.co", SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5dHJrY3FiY3lucXBkYXlwYnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0OTQ2MjIsImV4cCI6MjEwMDA3MDYyMn0.01tpWKIrYZY3m2XM4fy76dw2dh7Cf5_1mr8Qejl30F8";
 const PIN_HASH = "127fa4a54c3763efd794abc22e2759eb80d47d7b4c14904c8cb7f98a9be9aea3";
-// Same split as the quiz: these topics fill 4 of every 10 questions.
+// Same split as the quiz: these topics fill 6 of every 15 questions.
 const CORE = ["UNICEF", "UN", "RAS", "HR", "Team"];
-const PER_GROUP = {1: [1, 3], 2: [2, 2], 3: [1, 1]};   // [core, general] questions one group round uses
+const PER_GROUP = {1: [2, 4], 2: [3, 3], 3: [1, 2]};   // [core, general] questions one round of 15 uses
 const LV = {1: "Easy", 2: "Medium", 3: "Hard"};
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
@@ -223,7 +223,7 @@ function rail(){
     <div><h2>General</h2><div class="topics">${T.rest.map(c => b(c, c, T.count.get(c))).join("")}</div></div>
     ${gone ? `<div class="topics">${b("removed", "Removed", gone)}</div>` : ""}
     <div class="mixbox"><h2>Question mix</h2><table class="mix"><thead><tr><td></td><th scope="col">UN &amp; RAS</th><th scope="col">General</th></tr></thead><tbody>${[1, 2, 3].map(l => `<tr><th scope="row">${LV[l]}</th><td>${n(l, true)}</td><td>${n(l, false)}</td></tr>`).join("")}</tbody></table>
-      <p class="note">Enough for ${rounds} group rounds at the usual mix. The final draws from what is left.</p></div>`;
+      <p class="note">Enough for ${rounds} rounds of 15 at the usual mix. A quiz uses 3, then the final draws from what is left.</p></div>`;
   document.querySelectorAll("#lvseg button").forEach(x => x.setAttribute("aria-pressed", +x.dataset.l === level));
 }
 function hit(s){

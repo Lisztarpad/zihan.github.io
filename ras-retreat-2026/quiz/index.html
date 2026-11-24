@@ -85,6 +85,52 @@ button.a{cursor:pointer}
 .fin .dyk{gap:.6cqw;padding:1.1cqw 1.5cqw}
 .fin .dyk .txt{font-size:calc(1.85cqw * var(--fit,1))}
 
+.chips{display:flex;flex-wrap:wrap;gap:.8cqw;min-width:0}
+.chip{position:relative;overflow:hidden;display:flex;align-items:center;gap:.7cqw;padding:.4cqw 1.1cqw .4cqw .4cqw;border-radius:1cqw;background:rgb(255 255 255 / .05);border:.12cqw solid var(--line);font:800 1.6cqw/1 var(--display);font-variant-numeric:tabular-nums}
+.chip i{position:absolute;inset:0 auto 0 0;background:rgb(255 181 71 / .22);transition:width .4s}
+.chip.rev i{background:rgb(47 191 113 / .3)}
+.chip .gnum{width:2.5cqw;height:2.5cqw;font-size:1.4cqw;border-radius:.6cqw;position:relative}
+.chip b{position:relative;min-width:3.4cqw;text-align:right}
+/* break: standings */
+.bhead h2{font:800 3.4cqw/1.05 var(--display);margin:.6cqw 0 0;letter-spacing:-.02em}
+.bk{font:800 2.8cqw/1 var(--display);color:var(--amber);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bwrap{display:grid;grid-template-columns:minmax(0,1fr) 13cqw;gap:3cqw;flex:1;min-height:0}
+.bside{display:grid;gap:1cqw;align-content:start;justify-items:center}
+.bside .code{font-size:1.1cqw;gap:.6cqw}.bside .code b{font-size:2.2cqw}
+.qr.small{width:13cqw;padding:.7cqw}
+.pgrid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:.8cqw 1.2cqw;align-content:start;overflow:hidden}
+.scr:has(.pgrid){gap:1.1cqw;padding-top:1.8cqw}
+.scr:has(.pgrid) .hint{margin:0}
+.pgrid.one{grid-template-columns:minmax(0,1fr)}
+.grank{list-style:none;margin:0;padding:0;display:grid;gap:calc(.7cqw * var(--fit,1))}
+.grank li{position:relative;overflow:hidden;display:grid;grid-template-columns:2.4cqw auto minmax(0,1fr) 5cqw auto 7cqw;align-items:center;gap:1.4cqw;padding:calc(.9cqw * var(--fit,1)) 1.8cqw;border-radius:1.2cqw;background:rgb(255 255 255 / .04);font:700 calc(2.1cqw * var(--fit,1))/1.1 var(--body);font-variant-numeric:tabular-nums}
+.grank li>*{position:relative}
+.grank li>i{position:absolute;inset:0 auto 0 0;background:oklch(.78 .14 var(--h,70) / .16)}
+.grank .gnum,.pcard .gnum{background:oklch(.78 .14 var(--h,70))}
+.grank .pos{font:800 calc(2.1cqw * var(--fit,1))/1 var(--display);color:var(--soft)}
+.grank .sc{font:800 calc(3cqw * var(--fit,1))/1 var(--display);text-align:right}
+.grank .sm{font-size:calc(1.4cqw * var(--fit,1));font-weight:600;color:var(--soft);white-space:nowrap}
+.grank li.win{outline:.2cqw solid var(--amber);outline-offset:-.2cqw}
+.grank li.win .pos,.grank li.win .sc{color:var(--amber)}
+.mv{font:800 calc(1.5cqw * var(--fit,1))/1 var(--body);white-space:nowrap}
+.mv.up{color:var(--good-hi)}.mv.down{color:var(--bad-hi)}
+.gn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard{min-width:0;border-radius:1.2cqw;background:rgb(255 255 255 / .035);padding:calc(.6cqw * var(--fit,1)) .7cqw}
+.pcard .grp{font-size:calc(1.75cqw * var(--fit,1));gap:.8cqw;margin-bottom:calc(.3cqw * var(--fit,1));padding-inline:.5cqw}
+.pcard .gnum{width:calc(2.4cqw * var(--fit,1));height:calc(2.4cqw * var(--fit,1));font-size:calc(1.35cqw * var(--fit,1));border-radius:.6cqw}
+.pcard .ga{margin-left:auto;color:var(--soft);font-variant-numeric:tabular-nums}
+.pcard ol{list-style:none;margin:0;padding:0;display:grid}
+.pcard li{display:grid;grid-template-columns:1.2em auto minmax(0,1fr) auto 1.5em;align-items:center;gap:.45em;padding:.04em .4em;border-radius:.7em;font:600 calc(1.75cqw * var(--fit,1))/1.15 var(--body);font-variant-numeric:tabular-nums}
+.pcard li .av{font-size:calc(.75cqw * var(--fit,1));width:calc(2cqw * var(--fit,1));height:calc(2cqw * var(--fit,1));border-width:.12cqw}
+.pcard li .pos{color:var(--soft);text-align:right}
+.pcard li .tm{color:var(--soft);font-size:.8em}
+.pcard li .sc{font-weight:800;text-align:right}
+.pcard li.win{background:rgb(255 181 71 / .18);color:var(--amber)}
+.pcard li.win .pos,.pcard li.win .tm{color:inherit}
+.pcard li.pick{cursor:pointer}
+.pcard li.pick:hover{background:rgb(255 255 255 / .1)}
+.phone .card.brk h2{color:var(--amber);font-variant-numeric:tabular-nums}
+
 /* lobby */
 .lobby{display:grid;grid-template-columns:27cqw 1fr;gap:3cqw;height:100%;min-height:0}
 .join{display:flex;flex-direction:column;gap:1.1cqw;min-width:0}
@@ -271,15 +317,16 @@ const PIN_HASH = "127fa4a54c3763efd794abc22e2759eb80d47d7b4c14904c8cb7f98a9be9ae
 const SUPA_URL = "https://xytrkcqbcynqpdaypbwt.supabase.co", SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5dHJrY3FiY3lucXBkYXlwYnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0OTQ2MjIsImV4cCI6MjEwMDA3MDYyMn0.01tpWKIrYZY3m2XM4fy76dw2dh7Cf5_1mr8Qejl30F8";
 const BUILD = "f08fe205";
 
-const GROUP_LEVELS = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3];   // ten questions per group, getting harder
+const ROUNDS = 3;                                    // everyone plays at the same time, with a break after each round
+const ROUND_LEVELS = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3];   // fifteen questions per round, getting harder
+const BREAK_MS = 5 * 60000;
 const Q_TIME = 30000;
 const LADDER = [100, 200, 300, 500, 1000, 2000, 3000, 5000, 7500, 10000];
 const LADDER_LV = [1, 1, 1, 2, 2, 2, 2, 3, 3, 3];
-// 2/5 of every group round and every final climb is about UNICEF, the UN or recruitment (RAS):
-// one easy, two medium and one hard question out of ten, at random positions within their level.
+// 2/5 of every round and every final climb is about UNICEF, the UN or recruitment (RAS), at random positions within their level.
 const CORE_CATS = new Set(["UNICEF", "UN", "HR", "RAS", "Team"]);
-const CORE_PER_LEVEL = {1: 1, 2: 2, 3: 1};
-const GRACE = 8000;                                 // a phone counts as gone only after missing this long
+const CORE_ROUND = {1: 2, 2: 3, 3: 1}, CORE_LADDER = {1: 1, 2: 2, 3: 1};
+const PING = 10000, GRACE = 25000;                  // phones report in every PING; a phone counts as gone after missing GRACE
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -311,45 +358,48 @@ function av(name, cls = ""){
 }
 const LETTERS = "ABCD";
 
-/* ---------- network: Supabase Realtime, or tabs of this browser for testing (?local) ---------- */
+/* ---------- network: Supabase Realtime, or tabs of this browser for testing (?local) ----------
+   The host broadcasts the state to every phone. Phones post to the host's own inbox over HTTP, so an answer never
+   goes out to all the other phones: that keeps 55 people answering at once under the free plan's 100 messages a second. */
 const LOCAL = /[?&]local\b/.test(location.search) || SUPA_URL.startsWith("__") || !window.supabase;
-const ROOM = code => `ras-quiz-${BUILD}-${code}`;
-function makeNet(room, meta){
+const ROOM = code => `ras-quiz3-${BUILD}-${code}`;
+function makeNet(room, isHost){
   const h = {};
-  if (!LOCAL){
-    const client = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-    const ch = client.channel(room, {config: {presence: {key: meta.id}, broadcast: {self: false}}});
-    let ready = false, cur = meta;
-    ch.on("presence", {event: "sync"}, () => h.presence && h.presence(Object.values(ch.presenceState()).map(a => a[0]).filter(p => p && p.id)));
-    ["state", "action"].forEach(ev => ch.on("broadcast", {event: ev}, ({payload}) => h[ev] && h[ev](payload)));
-    ch.subscribe(async s => {
-      if (s === "SUBSCRIBED"){ ready = true; await ch.track(cur); h.ready && h.ready(); }
-      else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT" || s === "CLOSED") ready = false;
-    });
-    return {
-      send(ev, payload){ if (ready) ch.send({type: "broadcast", event: ev, payload}); },
-      track(m){ cur = m; if (ready) ch.track(m); },
-      on(ev, cb){ h[ev] = cb; },
-      get ready(){ return ready; }
-    };
+  if (LOCAL){
+    const bc = new BroadcastChannel(room);
+    bc.onmessage = ({data}) => h[data.t] && h[data.t](data.p);
+    setTimeout(() => h.ready && h.ready(), 50);
+    return {send(t, p){ bc.postMessage({t, p}); }, on(t, cb){ h[t] = cb; }, reset(){}, ready: true};
   }
-  const bc = new BroadcastChannel(room), peers = new Map();
-  let me = meta;
-  const emit = () => h.presence && h.presence([...peers.values()].map(p => p.p).concat([me]));
-  bc.onmessage = ({data}) => {
-    if (data.t === "hb"){ const isNew = !peers.has(data.p.id) || peers.get(data.p.id).p.name !== data.p.name; peers.set(data.p.id, {p: data.p, seen: Date.now()}); if (isNew) emit(); }
-    else if (data.t === "bye"){ peers.delete(data.id); emit(); }
-    else h[data.t] && h[data.t](data.p);
+  let client = null, ch = null, ready = false, gen = 0;
+  function connect(){
+    const my = ++gen; ready = false;
+    if (client){ try { client.removeAllChannels(); client.realtime.disconnect(); } catch (e){} }
+    client = window.supabase.createClient(SUPA_URL, SUPA_KEY, {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}});
+    ch = client.channel(room, {config: {broadcast: {self: false}}});
+    if (!isHost) ch.on("broadcast", {event: "state"}, ({payload}) => my === gen && h.state && h.state(payload));
+    ch.subscribe(s => {
+      if (my !== gen) return;
+      ready = s === "SUBSCRIBED";
+      if (ready && h.ready) h.ready();
+    });
+    if (isHost){
+      const inbox = client.channel(room + "-in", {config: {broadcast: {self: false}}});
+      inbox.on("broadcast", {event: "action"}, ({payload}) => my === gen && h.action && h.action(payload));
+      inbox.subscribe();
+    }
+  }
+  connect();
+  return {
+    send(ev, payload){
+      if (isHost){ if (ready) ch.send({type: "broadcast", event: ev, payload}); return; }
+      fetch(SUPA_URL + "/realtime/v1/api/broadcast", {method: "POST", keepalive: true, headers: {"Content-Type": "application/json", apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY},
+        body: JSON.stringify({messages: [{topic: room + "-in", event: ev, payload}]})}).catch(() => {});
+    },
+    on(ev, cb){ h[ev] = cb; },
+    reset: connect,
+    get ready(){ return ready; }
   };
-  setInterval(() => {
-    bc.postMessage({t: "hb", p: me});
-    const now = Date.now(); let gone = false;
-    for (const [k, v] of peers) if (now - v.seen > 3500){ peers.delete(k); gone = true; }
-    if (gone) emit();
-  }, 1000);
-  addEventListener("pagehide", () => bc.postMessage({t: "bye", id: me.id}));
-  setTimeout(() => { bc.postMessage({t: "hb", p: me}); emit(); h.ready && h.ready(); }, 50);
-  return {send(t, p){ bc.postMessage({t, p}); }, track(m){ me = m; bc.postMessage({t: "hb", p: me}); emit(); }, on(t, cb){ h[t] = cb; }, ready: true};
 }
 
 /* ---------- timer ring ---------- */
@@ -439,19 +489,21 @@ function startHost(pin, loaded){
   setBank(loaded);
   // Only between rounds: a question on screen must not change under the players.
   async function refreshBank(force){
-    if (H.phase !== "lobby" || bankBusy || (!force && Date.now() - bankAt < 5000)) return;
+    if (!HOME() || bankBusy || (!force && Date.now() - bankAt < 5000)) return;
     bankBusy = true; const b = await loadBank(pin); bankBusy = false;
-    if (H.phase !== "lobby") return;
+    if (!HOME()) return;
     if (b.src === "live" || bankSrc !== "live") setBank(b); else { bankSrc = "saved"; bankAt = Date.now(); }
     if (!document.querySelector(".modal") && !menuOpen) render();
   }
-  const HKEY = "rq-host-state";
+  const HKEY = "rq-host-state-3";
   const newCode = () => Array.from({length: 4}, () => "ACDEFHJKMNPRTWXY"[rnd(16)]).join("");
-  const fresh = () => ({code: newCode(), groups: [], groupsAt: 0, used: [], results: {}, phase: "lobby", cur: null, final: null});
+  const fresh = () => ({code: newCode(), groups: [], groupsAt: 0, used: [], rounds: [], results: {}, phase: "lobby", cur: null, view: "groups", breakEnd: 0, final: null});
   let H; try { H = JSON.parse(store.get(HKEY)) || fresh(); } catch (e){ H = fresh(); }
   const save = () => store.set(HKEY, JSON.stringify(H));
   const ME = {id: "host-" + Math.random().toString(36).slice(2, 8), host: true, at: Date.now()};
-  let seq = 0, net = null, armed = 0, pending = null, menuOpen = false;
+  const bootAt = Date.now();
+  let seq = 0, net = null, armed = 0, pending = null, menuOpen = false, dirty = false, lastPub = 0;
+  const HOME = () => H.phase === "lobby" || H.phase === "break";
 
   /* groups from the dealing page (same browser), or pasted */
   function savedGroups(){
@@ -465,7 +517,7 @@ function startHost(pin, loaded){
   }
   function maybeImport(){
     const s = savedGroups();
-    if (s && s.at > H.groupsAt && !Object.keys(H.results).length && H.phase === "lobby"){ setGroups(s.groups, s.at); return true; }
+    if (s && s.at > H.groupsAt && !H.rounds.length && H.phase === "lobby"){ setGroups(s.groups, s.at); return true; }
     return false;
   }
   maybeImport();
@@ -482,23 +534,23 @@ function startHost(pin, loaded){
     return out.filter(g => g.members.length);
   }
 
-  /* presence */
-  const known = new Map(); let listed = new Set();
-  function onPresence(list){ listed = new Set(list.map(p => p.id)); const now = Date.now(); list.forEach(p => known.set(p.id, {p, seen: now})); }
+  /* who is connected: phones report in, say goodbye when hidden, and drop out after GRACE */
+  const known = new Map();
   function onlineNames(){
     const now = Date.now(), s = new Set();
-    for (const id of listed){ const v = known.get(id); if (v) v.seen = now; }
-    for (const [id, v] of known){ if (now - v.seen > GRACE) known.delete(id); else if (v.p.name) s.add(v.p.name); }
+    for (const [id, v] of known){ if (now - v.seen > GRACE) known.delete(id); else if (v.name) s.add(v.name); }
     return s;
   }
+  const groupOf = name => H.groups.find(g => g.members.includes(name));
+  const everyone = () => H.groups.flatMap(g => g.members);
 
   /* questions */
   const isCore = q => CORE_CATS.has(q.cat);
-  function plan(levels){
+  function plan(levels, core){
     const out = levels.map(lv => ({lv, core: false}));
     for (const lv of [1, 2, 3]){
       const idx = out.map((s, i) => s.lv === lv ? i : -1).filter(i => i >= 0);
-      shuffle(idx).slice(0, CORE_PER_LEVEL[lv]).forEach(i => out[i].core = true);
+      shuffle(idx).slice(0, core[lv]).forEach(i => out[i].core = true);
     }
     return out;
   }
@@ -519,11 +571,9 @@ function startHost(pin, loaded){
   }
   const left = lv => bank.filter(q => q.lv === lv && !H.used.includes(q.id)).length;
 
-  /* ----- group round ----- */
-  function startGroup(g){
-    const grp = H.groups[g];
-    H.cur = {g, i: 0, qs: plan(GROUP_LEVELS).map(s => draw(s.lv, s.core)), score: {}, time: {}, seen: [], last: null};
-    grp.members.forEach(m => { H.cur.score[m] = 0; H.cur.time[m] = 0; });
+  /* ----- rounds: everyone answers at the same time ----- */
+  function startRound(){
+    H.cur = {r: H.rounds.length, i: 0, qs: plan(ROUND_LEVELS, CORE_ROUND).map(s => draw(s.lv, s.core)), p: {}, asked: 0, last: null};
     startQ();
   }
   function startQ(){
@@ -533,26 +583,52 @@ function startHost(pin, loaded){
   }
   function revealQ(){
     const c = H.cur, q = byId.get(c.qid), correct = c.opts.indexOf(q.a);
-    const dist = [0, 0, 0, 0], right = [], wrong = [];
+    const dist = [0, 0, 0, 0], right = [];
     for (const [name, a] of Object.entries(c.answers)){
       dist[a.c]++;
-      if (!c.seen.includes(name)) c.seen.push(name);
-      if (a.c === correct){ c.score[name] = (c.score[name] || 0) + 1; right.push(name); } else wrong.push(name);
-      c.time[name] = (c.time[name] || 0) + a.t;
+      const p = c.p[name] || (c.p[name] = {s: 0, t: 0, n: 0});
+      p.n++; p.t += a.t;
+      if (a.c === correct){ p.s++; right.push(name); }
     }
-    // anyone who has played this round but missed this question gets the full time added
-    c.seen.forEach(n => { if (!c.answers[n]) c.time[n] = (c.time[n] || 0) + Q_TIME; });
-    c.last = {correct, dist, right, wrong};
+    c.asked++;
+    c.last = {correct, dist, right};
     H.phase = "reveal"; save(); render(); publish();
   }
   function nextQ(){
     const c = H.cur;
-    if (c.i < c.qs.length - 1){ c.i++; startQ(); return; }
-    const ranking = c.seen.map(n => ({name: n, score: c.score[n] || 0, time: c.time[n] || 0})).sort((a, b) => b.score - a.score || a.time - b.time);
-    H.results[c.g] = {ranking, winner: ranking.length ? ranking[0].name : null};
-    H.phase = "gresult"; save(); render(); publish(); confetti();
+    if (c.i < c.qs.length - 1){ c.i++; startQ(); } else endRound();
   }
-  function toLobby(){ H.phase = "lobby"; H.cur = null; save(); render(); publish(); refreshBank(true); }
+  function endRound(){
+    H.rounds.push({asked: H.cur.asked, p: H.cur.p});
+    if (H.rounds.length >= ROUNDS) setWinners();
+    H.phase = "break"; H.cur = null; H.view = "groups"; H.breakEnd = Date.now() + BREAK_MS;
+    save(); render(); publish(); confetti(); refreshBank(true);
+  }
+  function setWinners(){
+    H.results = {};
+    standGroups().forEach(g => H.results[g.g] = {winner: g.people.length ? g.people[0].name : null});
+  }
+  // Scores after the first n rounds. A person's time counts every question, with the full time for each one missed.
+  function standGroups(n = H.rounds.length){
+    const rs = H.rounds.slice(0, n), asked = rs.reduce((s, r) => s + r.asked, 0), last = rs[n - 1] || {asked: 0, p: {}};
+    const list = H.groups.map(g => {
+      const people = g.members.map(name => {
+        const ps = rs.map(r => r.p[name]).filter(Boolean), sum = k => ps.reduce((s, p) => s + p[k], 0);
+        return {name, s: sum("s"), n: sum("n"), t: sum("t") + Q_TIME * (asked - sum("n")), rs: last.p[name] ? last.p[name].s : 0};
+      }).filter(p => p.n > 0).sort((a, b) => b.s - a.s || a.t - b.t);
+      const avg = k => people.length ? people.reduce((s, p) => s + p[k], 0) / people.length : 0;
+      return {g: g.g, name: g.name, people, size: g.members.length, avg: avg("s"), ravg: avg("rs"), time: avg("t")};
+    });
+    list.sort((a, b) => b.avg - a.avg || a.time - b.time);
+    list.forEach((g, i) => g.pos = i + 1);
+    if (n > 1){
+      const before = new Map(standGroups(n - 1).map(g => [g.g, g.pos]));
+      list.forEach(g => g.move = before.get(g.g) - g.pos);
+    }
+    list.asked = asked; list.lastAsked = last.asked;
+    return list;
+  }
+  function goHome(){ H.phase = H.rounds.length ? "break" : "lobby"; H.cur = null; save(); render(); publish(); refreshBank(true); }
 
   /* ----- final ----- */
   function finalists(){ return H.groups.filter(g => H.results[g.g] && H.results[g.g].winner).map(g => ({name: H.results[g.g].winner, g: g.g})); }
@@ -564,7 +640,7 @@ function startHost(pin, loaded){
   }
   function askF(){
     const F = H.final, name = F.order[F.idx], st = F.st[name];
-    if (!st.plan) st.plan = plan(LADDER_LV);
+    if (!st.plan) st.plan = plan(LADDER_LV, CORE_LADDER);
     const q = byId.get(draw(LADDER_LV[st.rung], st.plan[st.rung].core));
     F.cur = {name, rung: st.rung, qid: q.id, opts: arrange(q), start: Date.now(), deadline: Date.now() + Q_TIME, paused: null, pick: null, lockAt: 0, ok: null};
     H.phase = "fq"; pending = null; save(); render(); publish();
@@ -609,14 +685,15 @@ function startHost(pin, loaded){
   /* ----- actions from phones ----- */
   function onAction(a){
     if (!a || !a.type) return;
-    if (a.type === "hello"){ publish(); return; }
+    if (a.type === "bye"){ known.delete(a.id); return; }
+    if (a.id) known.set(a.id, {name: a.name || "", seen: Date.now()});
     if (a.type === "answer"){
-      if (H.phase === "q" && H.cur && a.qid === H.cur.qid && H.groups[H.cur.g].members.includes(a.name) && !H.cur.answers[a.name] && a.c >= 0 && a.c < 4){
+      if (H.phase === "q" && H.cur && a.qid === H.cur.qid && groupOf(a.name) && !H.cur.answers[a.name] && a.c >= 0 && a.c < 4){
         H.cur.answers[a.name] = {c: a.c, t: Math.min(Q_TIME, Date.now() - H.cur.start)};
-        save(); render(); publish();
+        save(); render();
       } else if (H.phase === "fq" && H.final && H.final.cur && H.final.cur.name === a.name && a.qid === H.final.cur.qid) lockF(a.c);
-      else publish();
     }
+    dirty = true;
   }
 
   /* ----- public state for phones ----- */
@@ -625,14 +702,19 @@ function startHost(pin, loaded){
     const S = {seq: ++seq, at: Date.now(), phase: H.phase, code: H.code,
       groups: H.groups.map(g => ({g: g.g, name: g.name, members: g.members})),
       results: Object.fromEntries(Object.entries(H.results).map(([g, r]) => [g, {winner: r.winner}]))};
+    S.boot = ME.id;
     const c = H.cur;
     if (c && (H.phase === "q" || H.phase === "reveal")){
       const q = byId.get(c.qid);
-      S.cur = {g: c.g, i: c.i, n: c.qs.length, qid: c.qid, text: q.t, opts: c.opts.map(k => q.o[k]),
+      S.cur = {r: c.r, i: c.i, n: c.qs.length, qid: c.qid, text: q.t, opts: c.opts.map(k => q.o[k]),
         remain: H.phase === "q" ? Math.max(0, c.deadline - Date.now()) : 0, answered: Object.keys(c.answers)};
-      if (H.phase === "reveal") Object.assign(S.cur, {correct: c.last.correct, dist: c.last.dist, right: c.last.right, score: c.score, why: q.x || ""});
+      if (H.phase === "reveal") Object.assign(S.cur, {correct: c.last.correct, dist: c.last.dist, score: Object.fromEntries(Object.entries(c.p).map(([n, p]) => [n, p.s])), why: q.x || ""});
     }
-    if (H.phase === "gresult" && c) S.gres = {g: c.g, ...H.results[c.g]};
+    if (H.phase === "break"){
+      const st = standGroups();
+      S.brk = {r: H.rounds.length, asked: st.asked, left: H.rounds.length < ROUNDS ? Math.max(0, H.breakEnd - Date.now()) : 0, done: !!Object.keys(H.results).length,
+        groups: st.map(g => ({g: g.g, name: g.name, avg: +g.avg.toFixed(1), move: g.move || 0, people: g.people.map(p => [p.name, p.s])}))};
+    }
     if (H.final){
       S.stand = standings().map(s => ({name: s.name, g: s.g, points: s.points, rung: s.rung, done: s.done, out: s.out}));
       S.forder = H.final.order; S.fidx = H.final.idx;
@@ -646,16 +728,18 @@ function startHost(pin, loaded){
       }
     }
     net.send("state", S);
+    dirty = false; lastPub = Date.now();
   }
 
   /* ----- clock ----- */
   function tick(){
     const now = Date.now();
     if (H.phase === "q" && H.cur){
-      const c = H.cur, on = onlineNames(), members = H.groups[c.g].members;
-      const live = members.filter(m => on.has(m) || c.answers[m]);
-      const all = live.length > 0 && live.every(m => c.answers[m]);
-      if (now >= c.deadline) revealQ();
+      const c = H.cur, on = onlineNames();
+      const live = everyone().filter(m => on.has(m) || c.answers[m]);
+      // right after a reload the host does not know yet who is there, so it waits for the timer
+      const all = now - bootAt > PING + 2000 && live.length > 0 && live.every(m => c.answers[m]);
+      if (now >= c.deadline + 600) revealQ();   // a moment for answers still on their way
       else if (all){ if (!armed) armed = now; else if (now - armed > 700) revealQ(); }
       else armed = 0;
       updateRing($("[data-timer]"), c.deadline - now, Q_TIME, false);
@@ -665,6 +749,7 @@ function startHost(pin, loaded){
       if (f.paused === null && now >= f.deadline){ f.pick = -1; H.final.st[f.name].time += Q_TIME; revealF(); return; }
       updateRing($("[data-timer]"), f.paused !== null ? f.paused : f.deadline - now, Q_TIME, f.paused !== null);
     }
+    if (H.phase === "break"){ const el = $("[data-bk]"); if (el) el.textContent = breakText(); }
     if (H.phase === "flock" && H.final && now - H.final.cur.lockAt > 2400) revealF();
   }
 
@@ -675,9 +760,16 @@ function startHost(pin, loaded){
     lastOnlineKey = [...on].sort().join("|");
     const P = H.phase;
     let body = "", ctl = "";
-    if (P === "lobby"){ body = lobbyView(on); ctl = H.groups.length ? `<button class="cbtn primary" data-act="final"${finalists().length ? "" : " disabled"}>Start the final</button>` : ""; }
-    else if (P === "q" || P === "reveal"){ body = questionView(on); ctl = P === "q" ? `<button class="cbtn" data-act="reveal">Reveal now <kbd>↵</kbd></button>` : `<button class="cbtn primary" data-act="next">${H.cur.i < H.cur.qs.length - 1 ? "Next question" : "Group results"} <kbd>↵</kbd></button>`; }
-    else if (P === "gresult"){ body = groupResultView(); ctl = `<button class="cbtn primary" data-act="lobby">Back to groups <kbd>↵</kbd></button>`; }
+    const go = label => `<button class="cbtn primary" data-act="start">${label}</button>`;
+    if (P === "lobby"){ body = lobbyView(on); ctl = H.groups.length ? go("Start round 1") : ""; }
+    else if (P === "q" || P === "reveal"){ body = questionView(on); ctl = P === "q" ? `<button class="cbtn" data-act="reveal">Reveal now <kbd>↵</kbd></button>` : `<button class="cbtn primary" data-act="next">${H.cur.i < H.cur.qs.length - 1 ? "Next question" : "Round results"} <kbd>↵</kbd></button>`; }
+    else if (P === "break"){
+      const more = H.rounds.length < ROUNDS && !Object.keys(H.results).length;
+      body = H.view === "people" ? peopleView() : groupsView();
+      ctl = (more ? `<button class="cbtn" data-act="plus">+1 min</button>` : "")
+        + (H.view === "people" ? `<button class="cbtn" data-act="vgroups">Group ranking</button>${more ? go(`Start round ${H.rounds.length + 1}`) : `<button class="cbtn primary" data-act="final"${finalists().length ? "" : " disabled"}>Start the final</button>`}`
+        : `<button class="cbtn primary" data-act="vpeople">Inside the groups <kbd>↵</kbd></button>`);
+    }
     else if (P === "fintro"){ body = finalIntroView(); ctl = `<button class="cbtn primary" data-act="climb">Start ${esc(firstName(H.final.order[H.final.idx]))}’s climb <kbd>↵</kbd></button>`; }
     else if (["fq", "flock", "freveal"].includes(P)){
       body = finalView();
@@ -685,16 +777,19 @@ function startHost(pin, loaded){
       if (P === "fq") ctl = f.paused !== null ? `<button class="cbtn primary" data-act="life">Resume the timer <kbd>↵</kbd></button>` : "";
       if (P === "freveal") ctl = `<button class="cbtn primary" data-act="nextf">${!st.done ? "Next question" : H.final.idx < H.final.order.length - 1 ? "Next finalist" : "Final standings"} <kbd>↵</kbd></button>`;
     }
-    else if (P === "champion"){ body = championView(); ctl = `<button class="cbtn" data-act="lobby">Back to groups</button>`; }
+    else if (P === "champion"){ body = championView(); ctl = `<button class="cbtn" data-act="lobby">Back to the scores</button>`; }
     const menu = `<div class="menu${menuOpen ? " open" : ""}"><button class="cbtn" data-act="menu" aria-expanded="${menuOpen}">Menu</button>${menuOpen ? `<div class="list">
-      ${P !== "lobby" ? `<button data-act="abandon">Stop and go back to the groups</button>` : ""}
+      ${!HOME() ? `<button data-act="abandon">${H.final ? "Stop the final" : "Cancel this round"}</button>` : ""}
+      ${P === "reveal" ? `<button data-act="endround">End this round here</button>` : ""}
+      ${P === "break" && H.rounds.length < ROUNDS && !Object.keys(H.results).length ? `<button data-act="skip">Skip to the final</button>` : ""}
       ${P === "lobby" && savedGroups() ? `<button data-act="reimport">Load groups from the dealing page</button>` : ""}
       ${P === "lobby" ? `<button data-act="paste">Paste groups</button>` : ""}
-      ${P === "lobby" ? `<button data-act="questions">Edit questions</button>` : ""}
+      ${HOME() ? `<button data-act="questions">Edit questions</button>` : ""}
       <button data-act="fullscreen">Full screen</button>
       <button class="danger" data-act="reset">Start a new quiz…</button></div>` : ""}</div>`;
     app.innerHTML = `<div class="host"><div class="box"><div class="scr">${body}</div><div class="ctl">${ctl}</div>${menu}</div></div>`;
-    if (P === "lobby") drawQR(); else fit();
+    if (P === "lobby" || P === "break") drawQR();
+    if (P !== "lobby") fit();
   }
   // Long question + long explanation: shrink the text step by step until the answers clear the control strip.
   function fit(){
@@ -702,6 +797,8 @@ function startHost(pin, loaded){
     const limit = () => scr.getBoundingClientRect().bottom - parseFloat(getComputedStyle(scr).paddingBottom) + 1;
     const bottom = () => Math.max(0, ...[...scr.querySelectorAll(".ans, .players")].map(e => e.getBoundingClientRect().bottom));
     let f = 1; scr.style.setProperty("--fit", 1);
+    const pg = scr.querySelector(".pgrid");
+    if (pg){ while (pg.scrollHeight > pg.clientHeight + 1 && f > .5){ f -= .04; scr.style.setProperty("--fit", f.toFixed(2)); } return; }
     while (bottom() > limit() && f > .6){ f -= .05; scr.style.setProperty("--fit", f.toFixed(2)); }
   }
   addEventListener("resize", () => { if (H.phase !== "lobby") fit(); });
@@ -723,11 +820,9 @@ function startHost(pin, loaded){
     const joined = H.groups.reduce((s, g) => s + g.members.filter(m => on.has(m)).length, 0);
     const cols = H.groups.length <= 4 ? 2 : H.groups.length <= 9 ? 3 : 4;
     const groups = H.groups.length ? `<div class="groups" style="--cols:${cols}">${H.groups.map(g => {
-      const r = H.results[g.g];
-      return `<div class="gcard${r ? " done" : ""}"><div class="grp" style="--h:${hueFor(g.g)}"><span class="gnum">${g.g + 1}</span><span>${esc(g.name)}</span></div>
+      return `<div class="gcard"><div class="grp" style="--h:${hueFor(g.g)}"><span class="gnum">${g.g + 1}</span><span>${esc(g.name)}</span></div>
         <div class="mem">${g.members.map(m => av(m, on.has(m) ? "on" : "")).join("")}</div>
-        <div class="foot">${r ? `<span>Winner: ${esc(r.winner ? shown(r.winner) : "nobody")}</span><button class="gbtn ghost" data-act="start" data-g="${g.g}">Play again</button>`
-          : `<span>${g.members.filter(m => on.has(m)).length} of ${g.members.length} joined</span><button class="gbtn" data-act="start" data-g="${g.g}">Start</button>`}</div></div>`;
+        <div class="foot"><span>${g.members.filter(m => on.has(m)).length} of ${g.members.length} joined</span></div></div>`;
     }).join("")}</div>`
       : `<div class="empty"><strong>No groups yet</strong><span>Deal the groups on the grouping page in this browser, then come back here. Or open the menu and paste the text from “Copy groups”.</span></div>`;
     return `<div class="lobby"><div class="join">
@@ -740,34 +835,52 @@ function startHost(pin, loaded){
       </div>${groups}</div>`;
   }
   function questionView(on){
-    const c = H.cur, g = H.groups[c.g], q = byId.get(c.qid), rev = H.phase === "reveal" ? c.last : null;
+    const c = H.cur, q = byId.get(c.qid), rev = H.phase === "reveal" ? c.last : null;
     const total = Object.keys(c.answers).length || 1;
     const opts = c.opts.map((k, d) => {
       const cls = rev ? (d === rev.correct ? " right" : " dim") : "";
       const n = rev ? rev.dist[d] : 0;
       return `<div class="a${cls}">${rev ? `<span class="bar" style="width:${Math.round(n / total * 100)}%"></span>` : ""}<b>${LETTERS[d]}</b><span class="t">${esc(q.o[k])}</span>${rev ? `<span class="n">${n}</span>` : ""}</div>`;
     }).join("");
-    const answered = Object.keys(c.answers).length, live = g.members.filter(m => on.has(m) || c.answers[m]).length;
-    const players = g.members.map(m => {
-      let cls = on.has(m) || c.answers[m] ? "" : "off";
-      if (rev){ if (rev.right.includes(m)) cls = "yes"; else if (rev.wrong.includes(m)) cls = "no"; }
-      else if (c.answers[m]) cls = "ok";
-      return av(m, cls);
+    const answered = Object.keys(c.answers).length, right = new Set(rev ? rev.right : []);
+    const live = m => on.has(m) || c.answers[m];
+    // one chip per group: how many have answered, then how many were right
+    const chips = H.groups.map(g => {
+      const there = g.members.filter(live).length, n = rev ? g.members.filter(m => right.has(m)).length : g.members.filter(m => c.answers[m]).length;
+      const of = rev ? g.members.filter(m => c.answers[m]).length : there;
+      return `<div class="chip${rev ? " rev" : ""}" style="--h:${hueFor(g.g)}" title="${esc(g.name)}"><i style="width:${of ? Math.round(n / of * 100) : 0}%"></i><span class="gnum">${g.g + 1}</span><b>${n}/${of}</b></div>`;
     }).join("");
-    const lbl = rev ? `<span class="lbl">${rev.right.length} of ${answered} right</span>` : `<span class="lbl">${answered} of ${live} locked in</span>`;
-    return `<div class="top"><div class="grp" style="--h:${hueFor(g.g)}"><span class="gnum">${g.g + 1}</span><span>${esc(g.name)}</span></div>
+    const lbl = rev ? `${right.size} of ${answered} right` : `${answered} of ${everyone().filter(live).length} locked in`;
+    return `<div class="top"><div class="grp">Round ${c.r + 1} of ${ROUNDS}</div>
       <div class="qn">Question ${c.i + 1} of ${c.qs.length}</div>${rev ? `<div class="timer"><span>✓</span></div>` : ring(c.deadline - Date.now(), Q_TIME, false)}</div>
-      <h2 class="q">${esc(q.t)}</h2>${rev && q.x ? whyPanel(q.x) : ""}<div class="ans">${opts}</div><div class="players">${players}${lbl}</div>`;
+      <h2 class="q">${esc(q.t)}</h2>${rev && q.x ? whyPanel(q.x) : ""}<div class="ans">${opts}</div><div class="players"><div class="chips">${chips}</div><span class="lbl">${lbl}</span></div>`;
   }
   function whyPanel(text){ return `<div class="dyk"><div class="lab">Did you know?</div><div class="txt">${esc(text)}</div></div>`; }
-  function groupResultView(){
-    const c = H.cur, g = H.groups[c.g], r = H.results[c.g];
-    const w = r.winner, wr = r.ranking.find(x => x.name === w);
-    const rows = r.ranking.map((x, i) => `<li class="pick${x.name === w ? " win" : ""}" data-act="winner" data-name="${esc(x.name)}"><span class="pos">${i + 1}</span>${av(x.name)}<span>${esc(shown(x.name))}</span><span class="sc">${x.score}/${c.qs.length}</span><span class="tm">${secs(x.time)}</span></li>`).join("");
-    return `<div class="top"><div class="grp" style="--h:${hueFor(g.g)}"><span class="gnum">${g.g + 1}</span><span>${esc(g.name)}</span></div><div class="qn">Group results</div></div>
-      <div class="res">${w ? `<div class="hero">${av(w)}<div class="kick">Into the final</div><h2>${esc(shown(w))}</h2><p>${wr.score} of ${c.qs.length} right · ${secs(wr.time)} total</p></div>`
-        : `<div class="hero"><h2>Nobody answered</h2><p>Check that phones are connected, then play the group again.</p></div>`}
-      <div><ol class="rank">${rows}</ol><div class="hint">Same score: the faster total time wins. Click a name to send someone else to the final.</div></div></div>`;
+  function breakText(){
+    const left = H.breakEnd - Date.now();
+    return left <= 0 ? "We’re starting again" : `Break · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}`;
+  }
+  function breakTop(title){
+    const more = H.rounds.length < ROUNDS && !Object.keys(H.results).length;
+    return `<div class="top"><div class="bhead"><div class="qn">${more ? `After round ${H.rounds.length} of ${ROUNDS}` : "After the last round"}</div><h2>${title}</h2></div>
+      ${more ? `<div class="bk" data-bk>${breakText()}</div>` : `<div class="bk">Next: the final</div>`}</div>`;
+  }
+  const moveTag = m => m > 0 ? `<span class="mv up">▲ ${m}</span>` : m < 0 ? `<span class="mv down">▼ ${-m}</span>` : `<span class="mv"></span>`;
+  function groupsView(){
+    const st = standGroups();
+    const rows = st.map(g => `<li class="${g.pos === 1 && g.people.length ? "win" : ""}" style="--h:${hueFor(g.g)}"><i style="width:${st.asked ? Math.round(g.avg / st.asked * 100) : 0}%"></i><span class="pos">${g.pos}</span><span class="gnum">${g.g + 1}</span><span class="gn">${esc(g.name)}</span>
+      ${moveTag(g.move)}<span class="sm">${H.rounds.length > 1 ? `this round ${g.ravg.toFixed(1)}` : `${g.people.length} ${g.people.length === 1 ? "player" : "players"}`}</span><span class="sc">${g.avg.toFixed(1)}</span></li>`).join("");
+    return `${breakTop("Group ranking")}<div class="bwrap"><div class="pgrid one"><ol class="grank">${rows}</ol></div>
+      <div class="bside"><div class="qr small" id="qr"></div><div class="code">Code <b>${esc(H.code)}</b></div></div></div>
+      <div class="hint">Average right answers per player, out of ${st.asked}. Same average: the faster group is ahead.</div>`;
+  }
+  function peopleView(){
+    const st = standGroups(), done = !!Object.keys(H.results).length, cols = st.length <= 4 ? st.length : st.length <= 6 ? 3 : 4;
+    const cards = st.map(g => `<div class="pcard" style="--h:${hueFor(g.g)}"><div class="grp"><span class="gnum">${g.g + 1}</span><span class="gn">${esc(g.name)}</span><span class="ga">${g.avg.toFixed(1)}</span></div>
+      <ol>${g.people.map((p, i) => { const win = done ? H.results[g.g] && H.results[g.g].winner === p.name : i === 0;
+        return `<li class="${win ? "win" : ""}${done ? " pick" : ""}"${done ? ` data-act="winner" data-g="${g.g}" data-name="${esc(p.name)}"` : ""}><span class="pos">${i + 1}</span>${av(p.name)}<span class="gn">${esc(shown(p.name))}</span><span class="tm">${Math.round(p.t / 1000)} s</span><span class="sc">${p.s}</span></li>`; }).join("") || `<li><span></span><span></span><span class="gn">Nobody answered</span></li>`}</ol></div>`).join("");
+    return `${breakTop(done ? "Group winners go to the final" : "Inside the groups")}<div class="pgrid" style="--cols:${cols}">${cards}</div>
+      <div class="hint">Right answers out of ${st.asked}. Same score: the faster total time is ahead.${done ? " Click a name to send someone else to the final." : ""}</div>`;
   }
   function ladderView(name, f){
     const st = H.final.st[name];
@@ -833,25 +946,33 @@ function startHost(pin, loaded){
     menuOpen = false;
     switch (name){
       case "start": {
-        const g = +el.dataset.g, grp = H.groups[g], on = onlineNames();
-        const missing = grp.members.filter(m => !on.has(m));
-        if (!missing.length){ startGroup(g); break; }
-        const n = missing.length;
-        dialog(`<h3>${n} ${n > 1 ? "people" : "person"} in Group ${g + 1} ${n > 1 ? "haven’t" : "hasn’t"} joined</h3>
-          <div class="miss">${missing.map(m => `<div>${av(m)}<span>${esc(shown(m))}</span></div>`).join("")}</div>
-          <p>They can still join while the group is playing, but they will miss the questions shown before they join.</p>
-          <div class="row"><button class="btn" data-x="cancel">Wait for them</button><button class="btn primary" data-x="ok">Start anyway</button></div>`,
-          (m, close) => { close(); if (H.phase === "lobby") startGroup(g); });
+        if (!HOME() || H.rounds.length >= ROUNDS) break;
+        const on = onlineNames(), all = everyone(), missing = all.filter(m => !on.has(m)), r = H.rounds.length + 1;
+        dialog(`<h3>Start round ${r}?</h3><p>${missing.length ? `${all.length - missing.length} of ${all.length} phones are connected. Not here yet:` : `All ${all.length} phones are connected.`}</p>
+          ${missing.length ? `<div class="miss">${missing.map(m => `<div>${av(m)}<span>${esc(shown(m))}</span></div>`).join("")}</div><p>They can join while the round is on, but they miss the questions shown before that.</p>` : ""}
+          <div class="row"><button class="btn" data-x="cancel">Wait</button><button class="btn primary" data-x="ok">Start round ${r}</button></div>`,
+          (m, close) => { close(); if (HOME()) startRound(); });
         render(); break;
       }
+      case "plus": H.breakEnd = Math.max(Date.now(), H.breakEnd) + 60000; save(); render(); publish(); break;
+      case "vpeople": H.view = "people"; save(); render(); break;
+      case "vgroups": H.view = "groups"; save(); render(); break;
+      case "endround":
+        dialog(`<h3>End this round here?</h3><p>The ${H.cur.asked} ${H.cur.asked === 1 ? "question" : "questions"} played so far count, and the break starts.</p><div class="row"><button class="btn" data-x="cancel">Keep playing</button><button class="btn primary" data-x="ok">End the round</button></div>`,
+          (m, close) => { close(); if (H.phase === "reveal") endRound(); });
+        render(); break;
+      case "skip":
+        dialog(`<h3>Skip to the final?</h3><p>The remaining rounds are not played. The first in each group goes to the final with the scores so far.</p><div class="row"><button class="btn" data-x="cancel">Not yet</button><button class="btn primary" data-x="ok">Skip to the final</button></div>`,
+          (m, close) => { close(); if (H.phase === "break"){ setWinners(); H.view = "people"; save(); render(); publish(); } });
+        render(); break;
       case "reveal": if (H.phase === "q") revealQ(); break;
       case "next": if (H.phase === "reveal") nextQ(); break;
-      case "lobby": toLobby(); break;
-      case "winner": if (H.phase === "gresult"){ H.results[H.cur.g].winner = el.dataset.name; save(); render(); publish(); } break;
+      case "lobby": goHome(); break;
+      case "winner": if (H.phase === "break" && H.results[el.dataset.g]){ H.results[el.dataset.g].winner = el.dataset.name; save(); render(); publish(); } break;
       case "final": {
-        const missing = H.groups.filter(g => !H.results[g.g]).length;
+        const missing = H.groups.filter(g => !(H.results[g.g] && H.results[g.g].winner)).length;
         if (!missing){ startFinal(); break; }
-        dialog(`<h3>Start the final now?</h3><p>${missing} group${missing > 1 ? "s have" : " has"} not played yet, so ${missing > 1 ? "they" : "it"} will have no finalist.</p><div class="row"><button class="btn" data-x="cancel">Not yet</button><button class="btn primary" data-x="ok">Start the final</button></div>`, (m, close) => { close(); startFinal(); });
+        dialog(`<h3>Start the final now?</h3><p>Nobody answered in ${missing} group${missing > 1 ? "s, so they" : ", so it"} will have no finalist.</p><div class="row"><button class="btn" data-x="cancel">Not yet</button><button class="btn primary" data-x="ok">Start the final</button></div>`, (m, close) => { close(); startFinal(); });
         render(); break;
       }
       case "climb": askF(); break;
@@ -862,13 +983,13 @@ function startHost(pin, loaded){
       case "life": lifeline(); break;
       case "nextf": if (H.phase === "freveal") nextF(); break;
       case "abandon":
-        dialog(`<h3>Stop this round?</h3><p>Nothing from the current round is kept. Questions already shown stay used.</p><div class="row"><button class="btn" data-x="cancel">Keep playing</button><button class="btn danger" data-x="ok">Stop</button></div>`,
-          (m, close) => { close(); if (H.final && ["fintro", "fq", "flock", "freveal", "champion"].includes(H.phase)) H.final = null; toLobby(); });
+        dialog(`<h3>${H.final ? "Stop the final?" : "Cancel this round?"}</h3><p>Nothing from it is kept. Questions already shown stay used.${H.final ? "" : " The scores of finished rounds stay."}</p><div class="row"><button class="btn" data-x="cancel">Keep playing</button><button class="btn danger" data-x="ok">Stop</button></div>`,
+          (m, close) => { close(); if (H.final && ["fintro", "fq", "flock", "freveal", "champion"].includes(H.phase)) H.final = null; goHome(); });
         render(); break;
-      case "reimport": { const s = savedGroups(); if (s){ setGroups(s.groups, s.at); H.results = {}; save(); } render(); publish(); break; }
+      case "reimport": { const s = savedGroups(); if (s){ setGroups(s.groups, s.at); save(); } render(); publish(); break; }
       case "paste":
         dialog(`<h3>Paste groups</h3><p>On the grouping page, press “Copy groups” and paste the text here.</p><textarea id="pasteT" spellcheck="false"></textarea><div class="err" id="pasteE"></div><div class="row"><button class="btn" data-x="cancel">Cancel</button><button class="btn primary" data-x="ok">Use these groups</button></div>`,
-          (m, close) => { const g = parsePasted(m.querySelector("#pasteT").value); if (!g.length){ m.querySelector("#pasteE").textContent = "No groups found. Paste the whole text, starting with “Group 1 · …”."; return; } setGroups(g); H.results = {}; save(); close(); render(); publish(); });
+          (m, close) => { const g = parsePasted(m.querySelector("#pasteT").value); if (!g.length){ m.querySelector("#pasteE").textContent = "No groups found. Paste the whole text, starting with “Group 1 · …”."; return; } setGroups(g); save(); close(); render(); publish(); });
         render(); break;
       case "questions": window.open(location.pathname.replace(/[^/]*$/, "") + "admin/", "_blank"); render(); break;
       case "fullscreen": try { document.documentElement.requestFullscreen(); } catch (e){} render(); break;
@@ -890,13 +1011,13 @@ function startHost(pin, loaded){
   addEventListener("storage", e => { if (e.key === "ras26-groups") refreshGroups(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshGroups(); });
 
-  net = makeNet(ROOM(H.code), ME);
-  net.on("presence", list => { onPresence(list); const k = [...onlineNames()].sort().join("|"); if (k !== lastOnlineKey && ["lobby", "q", "reveal"].includes(H.phase)) render(); });
+  net = makeNet(ROOM(H.code), true);
   net.on("action", onAction);
   net.on("ready", publish);
   render();
   setInterval(tick, 200);
-  setInterval(publish, 2000);
+  // phase changes go out at once; answers and phones coming and going are batched
+  setInterval(() => { if (Date.now() - lastPub >= (dirty ? 1400 : 2000)) publish(); }, 200);
   setInterval(() => { const k = [...onlineNames()].sort().join("|"); if (k !== lastOnlineKey && ["lobby", "q", "reveal"].includes(H.phase)) render(); }, 1500);
   window.__quiz = {get H(){ return H; }, get bank(){ return bank; }, get src(){ return bankSrc; }};   // for testing from the console
 }
@@ -915,24 +1036,48 @@ function phoneMain(){
   const id = store.sget("rq-id") || Math.random().toString(36).slice(2, 10); store.sset("rq-id", id);
   let me = store.get("rq-me") || "", S = null, gotAt = 0, recvAt = 0, filter = "", lastKey = "";
   let mine = {}; try { mine = JSON.parse(store.sget("rq-mine") || "{}"); } catch (e){}
-  const net = makeNet(ROOM(code), {id, name: me, at: Date.now()});
-  net.on("state", s => { if (S && s.seq < S.seq && s.at <= S.at) return; S = s; gotAt = recvAt = Date.now(); render(); });
-  net.on("ready", () => net.send("action", {type: "hello"}));
-  setInterval(() => { if (!S || Date.now() - gotAt > 5000) net.send("action", {type: "hello"}); }, 2500);
+  const net = makeNet(ROOM(code), false);
+  const ping = () => net.send("action", {type: "ping", id, name: me});
+  let boot = "", lastReset = Date.now();
+  net.on("state", s => {
+    if (S && s.boot === S.boot && s.seq < S.seq) return;
+    if (S && s.boot !== S.boot && s.at < S.at) return;
+    S = s; gotAt = recvAt = Date.now();
+    if (s.boot !== boot){ if (boot) setTimeout(ping, Math.random() * 1500); boot = s.boot; }   // the host screen was reloaded: report in
+    awake(["q", "reveal", "fq", "flock", "freveal"].includes(s.phase)); render();
+  });
+  net.on("ready", ping);
+  setInterval(() => { if (!document.hidden) ping(); }, PING);
+  // Phones sleep during the break. When one wakes up without hearing the host, it connects afresh.
+  setInterval(() => { if (!document.hidden && Date.now() - Math.max(gotAt, lastReset) > 9000){ lastReset = Date.now(); net.reset(); } }, 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) net.send("action", {type: "bye", id});
+    else { ping(); if (gotAt && Date.now() - gotAt > 6000){ lastReset = Date.now(); net.reset(); } }
+  });
+  addEventListener("pagehide", () => net.send("action", {type: "bye", id}));
+  let lock = null, locking = false;   // keep the screen on while questions are running, not during the break
+  async function awake(on){
+    if (locking || !navigator.wakeLock || document.hidden) return;
+    locking = true;
+    try { if (on && !lock){ lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } else if (!on && lock) await lock.release(); } catch (e){}
+    locking = false;
+  }
 
   const myGroup = () => S && S.groups.find(g => g.members.includes(me));
-  function choose(name){ me = name; store.set("rq-me", name); net.track({id, name, at: Date.now()}); lastKey = ""; render(); }
+  function choose(name){ me = name; store.set("rq-me", name); ping(); lastKey = ""; render(); }
   function answer(qid, c){
     if (mine[qid] !== undefined) return;
     mine[qid] = c; store.sset("rq-mine", JSON.stringify(mine));
-    net.send("action", {type: "answer", name: me, qid, c}); lastKey = ""; render();
+    sentAt = Date.now(); net.send("action", {type: "answer", id, name: me, qid, c}); lastKey = ""; render();
   }
   // keep re-sending an answer until the host shows it as received
+  let sentAt = 0;
   setInterval(() => {
-    if (!S || !me) return;
-    if (S.phase === "q" && S.cur && mine[S.cur.qid] !== undefined && !S.cur.answered.includes(me)) net.send("action", {type: "answer", name: me, qid: S.cur.qid, c: mine[S.cur.qid]});
-    if (S.phase === "fq" && S.fin && S.fin.name === me && mine[S.fin.qid] !== undefined && S.fin.pick === null) net.send("action", {type: "answer", name: me, qid: S.fin.qid, c: mine[S.fin.qid]});
-  }, 1500);
+    if (!S || !me || Date.now() - sentAt < 2500) return;
+    const resend = net.send; sentAt = Date.now();
+    if (S.phase === "q" && S.cur && mine[S.cur.qid] !== undefined && !S.cur.answered.includes(me)) resend("action", {type: "answer", id, name: me, qid: S.cur.qid, c: mine[S.cur.qid]});
+    if (S.phase === "fq" && S.fin && S.fin.name === me && mine[S.fin.qid] !== undefined && S.fin.pick === null) resend("action", {type: "answer", id, name: me, qid: S.fin.qid, c: mine[S.fin.qid]});
+  }, 500);
 
   function head(sub){
     return `<div class="me">${av(me)}<div class="nm"><strong>${esc(shown(me))}</strong><small>${esc(sub)}</small></div><button class="sw" data-act="switch">Not you?</button></div>`;
@@ -944,33 +1089,33 @@ function phoneMain(){
     if (!S){ app.innerHTML = `<div class="phone"><div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div><div class="card"><h2>Connecting…</h2><p>Waiting for the big screen. Keep this page open.</p></div></div>`; return; }
     const g = myGroup();
     if (!me || !g) return pickName();
-    const P = S.phase, key = JSON.stringify([P, me, S.cur && [S.cur.qid, S.cur.answered.includes(me), S.cur.correct], S.gres && S.gres.winner, S.fin && [S.fin.qid, S.fin.pick, S.fin.paused, S.fin.correct], S.fidx, mine[(S.cur || S.fin || {}).qid], S.results]);
+    const P = S.phase, key = JSON.stringify([P, me, S.cur && [S.cur.qid, S.cur.answered.includes(me), S.cur.correct], S.brk && [S.brk.r, S.brk.done], S.fin && [S.fin.qid, S.fin.pick, S.fin.paused, S.fin.correct], S.fidx, mine[(S.cur || S.fin || {}).qid], S.results]);
     if (key === lastKey){ tickTimer(); return; }
     lastKey = key;
     const sub = `Group ${g.g + 1} · ${g.name}`;
     let html = head(sub);
     if ((P === "q" || P === "reveal") && S.cur){
-      const c = S.cur, inGroup = c.g === g.g, my = mine[c.qid];
-      html += `<div class="pq"><span>${inGroup ? `Question ${c.i + 1} of ${c.n}` : `Group ${c.g + 1} is playing · Q${c.i + 1}`}</span>${P === "q" ? `<span class="tm" data-tm></span>` : ""}</div><p class="ptxt">${esc(c.text)}</p>`;
-      if (inGroup){
-        const locked = my !== undefined || P === "reveal";
-        const st = d => P === "reveal" ? (d === c.correct ? " right" : d === my ? " wrong" : " dim") : (d === my ? " sel" : my !== undefined ? " dim" : "");
-        st.locked = locked;
-        html += buttons(c.opts, st);
-        if (P === "q") html += `<div class="note${my === undefined ? " soft" : ""}">${my === undefined ? "Tap your answer. You can’t change it." : c.answered.includes(me) ? `Locked in · ${LETTERS[my]}` : "Sending…"}</div>`;
-        else html += `<div class="note ${my === c.correct ? "good" : "bad"}">${my === undefined ? "No answer this time" : my === c.correct ? "Correct!" : `Not this time · it was ${LETTERS[c.correct]}`} · ${(c.score && c.score[me]) || 0} right so far</div>`;
-      } else if (P === "q") {
-        html += `<div class="card"><p>Watch the big screen. Your group plays on its own turn.</p></div>`;
-      } else html += `<div class="note good">The answer is ${LETTERS[c.correct]} · ${esc(c.opts[c.correct])}</div>`;
+      const c = S.cur, my = mine[c.qid];
+      html += `<div class="pq"><span>Round ${c.r + 1} · question ${c.i + 1} of ${c.n}</span>${P === "q" ? `<span class="tm" data-tm></span>` : ""}</div><p class="ptxt">${esc(c.text)}</p>`;
+      const locked = my !== undefined || P === "reveal";
+      const st = d => P === "reveal" ? (d === c.correct ? " right" : d === my ? " wrong" : " dim") : (d === my ? " sel" : my !== undefined ? " dim" : "");
+      st.locked = locked;
+      html += buttons(c.opts, st);
+      if (P === "q") html += `<div class="note${my === undefined ? " soft" : ""}">${my === undefined ? "Tap your answer. You can’t change it." : c.answered.includes(me) ? `Locked in · ${LETTERS[my]}` : "Sending…"}</div>`;
+      else {
+        const got = my !== undefined && c.answered.includes(me);
+        html += `<div class="note ${got && my === c.correct ? "good" : "bad"}">${!got ? (my === undefined ? "No answer this time" : "Your answer arrived too late") : my === c.correct ? "Correct!" : `Not this time · it was ${LETTERS[c.correct]}`} · ${(c.score && c.score[me]) || 0} right this round</div>`;
+      }
       if (P === "reveal" && c.why) html += `<div class="pwhy"><b>Did you know?</b>${esc(c.why)}</div>`;
-    } else if (P === "gresult" && S.gres){
-      const r = S.gres, w = r.winner;
-      if (r.g === g.g){
-        const pos = r.ranking.findIndex(x => x.name === me), mineR = r.ranking[pos];
-        html += `<div class="card">${w === me ? `<h2>You won your group!</h2><p>See you in the final.</p>` : `<h2>${w ? esc(shown(w)) + " goes to the final" : "Group finished"}</h2>`}
-          ${mineR ? `<div class="big">${mineR.score}/${GROUP_LEVELS.length}</div><p>Your place: ${pos + 1} of ${r.ranking.length}</p>` : `<p>You didn’t answer in this round.</p>`}</div>
-          <ul class="mini">${r.ranking.map((x, i) => `<li class="${x.name === me ? "mine" : ""}">${i + 1}. ${av(x.name)}<span>${esc(shown(x.name))}</span><b>${x.score}</b></li>`).join("")}</ul>`;
-      } else html += `<div class="card"><h2>Group ${r.g + 1} is done</h2><p>${w ? esc(shown(w)) + " goes to the final." : ""}</p></div>`;
+    } else if (P === "break" && S.brk){
+      const b = S.brk, gi = b.groups.findIndex(x => x.g === g.g), G = b.groups[gi], pos = G ? G.people.findIndex(p => p[0] === me) : -1;
+      const last = b.done || b.r >= ROUNDS, w = S.results[g.g] && S.results[g.g].winner;
+      html += `<div class="card"><div class="eyebrow">${last ? "After the last round" : `After round ${b.r} of ${ROUNDS}`}</div>
+        ${last ? (w === me ? `<h2>You won your group!</h2><p>See you in the final.</p>` : w ? `<h2>${esc(shown(w))} goes to the final</h2>` : "") : ""}
+        ${pos >= 0 ? `<div class="big">${G.people[pos][1]}/${b.asked}</div><p>You are number ${pos + 1} of ${G.people.length} in your group. Your group is number ${gi + 1} of ${b.groups.length}.</p>` : `<p>No answers from you yet. Join the next round!</p>`}</div>`;
+      if (!last) html += `<div class="card brk"><h2 data-bk></h2><p>Keep this page, or scan the code again when you’re back.</p></div>`;
+      if (G && G.people.length) html += `<div class="who-list"><div><h3>Your group</h3><ul class="mini">${G.people.map(([n, sc], i) => `<li class="${n === me ? "mine" : ""}">${i + 1}. ${av(n)}<span>${esc(shown(n))}</span><b>${sc}</b></li>`).join("")}</ul></div></div>`;
+      html += `<div class="who-list"><div><h3>All groups · average right answers</h3><ul class="mini">${b.groups.map((x, i) => `<li class="${x.g === g.g ? "mine" : ""}">${i + 1}. <span>${esc(x.name)}</span><b>${x.avg.toFixed(1)}</b></li>`).join("")}</ul></div></div>`;
     } else if (["fq", "flock", "freveal"].includes(P) && S.fin){
       const f = S.fin, mineTurn = f.name === me, my = mine[f.qid];
       html += `<div class="pq"><span>${mineTurn ? `Your question ${f.rung + 1} · ${fmt(LADDER[f.rung])} pts` : `${esc(firstName(f.name))} · question ${f.rung + 1}`}</span>${P === "fq" ? `<span class="tm" data-tm></span>` : ""}</div><p class="ptxt">${esc(f.text)}</p>`;
@@ -994,8 +1139,7 @@ function phoneMain(){
       const w = S.stand[0];
       html += `<div class="card"><div class="eyebrow">Champion</div><h2>${w.name === me ? "You won the Big RAS Quiz!" : esc(shown(w.name))}</h2><p>${fmt(w.points)} points</p></div>${standList()}`;
     } else {
-      const r = S.results[g.g];
-      html += `<div class="card">${r ? `<h2>Your group has played</h2><p>${r.winner ? esc(shown(r.winner)) + " goes to the final." : ""}</p>` : `<h2>You’re in</h2><p>Your group plays when the host starts it. Keep this page open; questions appear here.</p>`}</div>`;
+      html += `<div class="card"><h2>You’re in</h2><p>Everyone plays at the same time: ${ROUNDS} rounds of ${ROUND_LEVELS.length} questions, with a break after each one. Keep this page open; questions appear here.</p></div>`;
     }
     html += `<div class="status" id="st"></div>`;
     app.innerHTML = `<div class="phone">${html}</div>`;
@@ -1020,7 +1164,11 @@ function phoneMain(){
     $("#find").addEventListener("input", e => { filter = e.target.value; draw(); });
   }
   function tickTimer(){
-    const el = $("[data-tm]"), st = $("#st");
+    const el = $("[data-tm]"), st = $("#st"), bk = $("[data-bk]");
+    if (bk && S && S.brk){
+      const left = S.brk.left - (Date.now() - recvAt);
+      bk.textContent = left <= 0 ? "We’re starting again" : `Break · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")} left`;
+    }
     if (el && S){
       const base = S.cur && S.phase === "q" ? S.cur.remain : S.fin ? S.fin.remain : 0;
       const paused = S.fin && S.fin.paused;
@@ -1034,7 +1182,7 @@ function phoneMain(){
   app.addEventListener("click", e => {
     const el = e.target.closest("[data-act]"); if (!el || el.disabled) return;
     if (el.dataset.act === "pick") choose(el.dataset.name);
-    if (el.dataset.act === "switch"){ me = ""; store.del("rq-me"); net.track({id, name: "", at: Date.now()}); lastKey = ""; render(); }
+    if (el.dataset.act === "switch"){ me = ""; store.del("rq-me"); ping(); lastKey = ""; render(); }
     if (el.dataset.act === "ans" && S){
       const c = +el.dataset.c;
       if (S.phase === "q" && S.cur) answer(S.cur.qid, c);
