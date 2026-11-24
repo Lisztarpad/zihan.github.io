@@ -395,17 +395,33 @@ if (location.hash === "#host") hostMain(); else phoneMain();
 async function sha256(s){ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
 
 async function hostMain(){
-  if (store.get("rq-host") !== PIN_HASH){
+  let pin = store.get("rq-pin") || "";
+  if (await sha256("rq26:" + pin) !== PIN_HASH){
     app.innerHTML = `<div class="pin"><form id="pinf"><div class="qn">The Big RAS Quiz</div><h1>Host PIN</h1>
       <input id="pinv" inputmode="numeric" autocomplete="off" maxlength="8" aria-label="Host PIN" autofocus>
       <p class="err" id="pine"></p><button type="submit">Open the host screen</button></form></div>`;
     await new Promise(resolve => $("#pinf").addEventListener("submit", async e => {
       e.preventDefault();
-      if (await sha256("rq26:" + $("#pinv").value.trim()) === PIN_HASH){ store.set("rq-host", PIN_HASH); resolve(); }
+      const v = $("#pinv").value.trim();
+      if (await sha256("rq26:" + v) === PIN_HASH){ pin = v; store.set("rq-pin", v); resolve(); }
       else { $("#pine").textContent = "That PIN is not right. Try again."; $("#pinv").select(); }
     }));
   }
-  startHost();
+  app.innerHTML = `<div class="pin"><p>Loading the questions…</p></div>`;
+  startHost(pin, await loadBank(pin));
+}
+
+// The question bank lives in the database and is edited on the admin page. If it can't be reached:
+// the copy saved by the last successful load, then the questions built into this page.
+async function loadBank(pin){
+  try {
+    const res = await fetch(SUPA_URL + "/rest/v1/rpc/rasquiz_list", {method: "POST", signal: AbortSignal.timeout(8000),
+      headers: {"Content-Type": "application/json", apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY}, body: JSON.stringify({p_pin: pin})});
+    const list = res.ok ? await res.json() : null;
+    if (Array.isArray(list) && list.some(q => !q.removed)){ store.set("rq-bank", JSON.stringify(list)); return {list, src: "live"}; }
+  } catch (e){}
+  try { const list = JSON.parse(store.get("rq-bank")); if (Array.isArray(list) && list.some(q => !q.removed)) return {list, src: "saved"}; } catch (e){}
+  return {list: decodeBank(), src: "built-in"};
 }
 
 function decodeBank(){
@@ -415,8 +431,20 @@ function decodeBank(){
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
-function startHost(){
-  const bank = decodeBank(), byId = new Map(bank.map(q => [q.id, q]));
+function startHost(pin, loaded){
+  // byId also keeps removed and built-in questions, so a round already under way never loses its question
+  let bank = [], bankSrc = "", bankAt = 0, bankBusy = false;
+  const byId = new Map(decodeBank().map(q => [q.id, q]));
+  function setBank(b){ bank = b.list.filter(q => !q.removed); b.list.forEach(q => byId.set(q.id, q)); bankSrc = b.src; bankAt = Date.now(); }
+  setBank(loaded);
+  // Only between rounds: a question on screen must not change under the players.
+  async function refreshBank(force){
+    if (H.phase !== "lobby" || bankBusy || (!force && Date.now() - bankAt < 5000)) return;
+    bankBusy = true; const b = await loadBank(pin); bankBusy = false;
+    if (H.phase !== "lobby") return;
+    if (b.src === "live" || bankSrc !== "live") setBank(b); else { bankSrc = "saved"; bankAt = Date.now(); }
+    if (!document.querySelector(".modal") && !menuOpen) render();
+  }
   const HKEY = "rq-host-state";
   const newCode = () => Array.from({length: 4}, () => "ACDEFHJKMNPRTWXY"[rnd(16)]).join("");
   const fresh = () => ({code: newCode(), groups: [], groupsAt: 0, used: [], results: {}, phase: "lobby", cur: null, final: null});
@@ -524,7 +552,7 @@ function startHost(){
     H.results[c.g] = {ranking, winner: ranking.length ? ranking[0].name : null};
     H.phase = "gresult"; save(); render(); publish(); confetti();
   }
-  function toLobby(){ H.phase = "lobby"; H.cur = null; save(); render(); publish(); }
+  function toLobby(){ H.phase = "lobby"; H.cur = null; save(); render(); publish(); refreshBank(true); }
 
   /* ----- final ----- */
   function finalists(){ return H.groups.filter(g => H.results[g.g] && H.results[g.g].winner).map(g => ({name: H.results[g.g].winner, g: g.g})); }
@@ -662,6 +690,7 @@ function startHost(){
       ${P !== "lobby" ? `<button data-act="abandon">Stop and go back to the groups</button>` : ""}
       ${P === "lobby" && savedGroups() ? `<button data-act="reimport">Load groups from the dealing page</button>` : ""}
       ${P === "lobby" ? `<button data-act="paste">Paste groups</button>` : ""}
+      ${P === "lobby" ? `<button data-act="questions">Edit questions</button>` : ""}
       <button data-act="fullscreen">Full screen</button>
       <button class="danger" data-act="reset">Start a new quiz…</button></div>` : ""}</div>`;
     app.innerHTML = `<div class="host"><div class="box"><div class="scr">${body}</div><div class="ctl">${ctl}</div>${menu}</div></div>`;
@@ -707,7 +736,7 @@ function startHost(){
         <div class="url">Scan, or open <b>${esc(shortUrl)}</b> and type the code</div>
         <div class="code">Code <b>${esc(H.code)}</b></div>
         <div class="online"><span>${joined}</span> of ${total} phones connected</div>
-        <div class="stats">Questions left · easy ${left(1)} · medium ${left(2)} · hard ${left(3)}</div>
+        <div class="stats">Questions left · easy ${left(1)} · medium ${left(2)} · hard ${left(3)}${bankSrc === "live" ? "" : `<br>Question bank not reachable: using the ${bankSrc} questions`}</div>
       </div>${groups}</div>`;
   }
   function questionView(on){
@@ -841,6 +870,7 @@ function startHost(){
         dialog(`<h3>Paste groups</h3><p>On the grouping page, press “Copy groups” and paste the text here.</p><textarea id="pasteT" spellcheck="false"></textarea><div class="err" id="pasteE"></div><div class="row"><button class="btn" data-x="cancel">Cancel</button><button class="btn primary" data-x="ok">Use these groups</button></div>`,
           (m, close) => { const g = parsePasted(m.querySelector("#pasteT").value); if (!g.length){ m.querySelector("#pasteE").textContent = "No groups found. Paste the whole text, starting with “Group 1 · …”."; return; } setGroups(g); H.results = {}; save(); close(); render(); publish(); });
         render(); break;
+      case "questions": window.open(location.pathname.replace(/[^/]*$/, "") + "admin/", "_blank"); render(); break;
       case "fullscreen": try { document.documentElement.requestFullscreen(); } catch (e){} render(); break;
       case "reset":
         dialog(`<h3>Start a new quiz?</h3><p>This clears the groups, all results and the list of used questions, and makes a new join code, so phones need to scan again. Then deal the groups again on the grouping page.</p><div class="row"><button class="btn" data-x="cancel">Cancel</button><button class="btn danger" data-x="ok">Start a new quiz</button></div>`,
@@ -855,7 +885,7 @@ function startHost(){
     if (e.key === "Escape" && menuOpen){ menuOpen = false; render(); }
   });
   // Pick up a new deal right away: the dealing page writes to localStorage, which fires "storage" in this tab.
-  const refreshGroups = () => { if (maybeImport()){ render(); publish(); } };
+  const refreshGroups = () => { if (maybeImport()){ render(); publish(); } refreshBank(); };
   addEventListener("focus", refreshGroups);
   addEventListener("storage", e => { if (e.key === "ras26-groups") refreshGroups(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshGroups(); });
@@ -868,7 +898,7 @@ function startHost(){
   setInterval(tick, 200);
   setInterval(publish, 2000);
   setInterval(() => { const k = [...onlineNames()].sort().join("|"); if (k !== lastOnlineKey && ["lobby", "q", "reveal"].includes(H.phase)) render(); }, 1500);
-  window.__quiz = {get H(){ return H; }, bank};   // for testing from the console
+  window.__quiz = {get H(){ return H; }, get bank(){ return bank; }, get src(){ return bankSrc; }};   // for testing from the console
 }
 
 /* ======================================================================

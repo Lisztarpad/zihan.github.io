@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Question Bank · The Big RAS Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: the quiz's dark studio, calmer. Left rail = topics (a scrolling strip on phones), right = questions grouped by topic, edited in place. */
+:root{
+  --bg0:#070d16; --bg1:#0c1726; --bg2:#1f3d5c; --panel:#0f1d30; --field:#0a1524;
+  --ink:#e9f1fb; --soft:#8fb3d9; --line:#2b4d73; --line2:#3d6a99;
+  --amber:#ffb547; --amber-ink:#1a1204; --good-hi:#7ce3a8; --good:#2fbf71; --bad:#e5484d; --bad-hi:#ff9a9e;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 70vh at 50% -10%,var(--bg2) 0%,var(--bg1) 55%,var(--bg0) 100%) 0 0/100% 100vh no-repeat var(--bg0);color:var(--ink);font:400 16px/1.45 var(--body)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-right))}
+.eyebrow{font:600 13px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);letter-spacing:-.02em;margin:8px 0 0}
+.btn{border:1px solid var(--line2);background:transparent;border-radius:999px;padding:10px 18px;font:700 15px/1 var(--body);white-space:nowrap}
+.btn:hover{background:rgb(255 255 255 / .06)}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.btn.primary:hover{background:#ffc56d}
+.btn.small{padding:8px 14px;font-size:14px}
+.btn.quiet{border-color:transparent;color:var(--soft)}
+.btn.quiet:hover{color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding-block:28px 20px}
+header .acts{display:flex;flex-wrap:wrap;gap:10px}
+.cols{display:grid;grid-template-columns:232px minmax(0,1fr);gap:32px;padding-bottom:80px;align-items:start}
+.rail{position:sticky;top:16px;display:grid;gap:18px;max-height:calc(100vh - 32px);overflow:auto;padding-right:4px}
+.rail h2{margin:0 0 6px;font:600 13px/1.3 var(--body);color:var(--soft)}
+.topics{display:grid;gap:2px}
+.topic{display:flex;justify-content:space-between;gap:12px;border:0;background:transparent;border-radius:10px;padding:8px 12px;text-align:left;font-weight:600}
+.topic:hover{background:rgb(255 255 255 / .05)}
+.topic span{color:var(--soft);font-variant-numeric:tabular-nums;font-weight:500}
+.topic[aria-pressed=true]{background:var(--amber);color:var(--amber-ink)}
+.topic[aria-pressed=true] span{color:inherit}
+.mix{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.mix th{font-weight:500;color:var(--soft);text-align:right;padding:4px 0}
+.mix td{text-align:right;padding:4px 0;font-weight:600}
+.mix th:first-child{text-align:left}
+.note{font-size:13px;color:var(--soft);margin:8px 0 0}
+.tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:20px}
+input[type=search],input[type=text],input[type=password],select,textarea{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+.tools input[type=search]{flex:1 1 220px;width:auto;min-width:0}
+::placeholder{color:#6f8fb1;opacity:1}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--field)}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 14px;font:600 14px/1 var(--body);color:var(--soft)}
+.seg button[aria-pressed=true]{background:var(--bg2);color:var(--ink)}
+section.group{margin-bottom:36px}
+.ghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.ghead h2{font:800 24px/1.1 var(--display);margin:0}
+.ghead p{margin:0;color:var(--soft);font-size:14px;font-variant-numeric:tabular-nums}
+.q{padding:16px 0;border-bottom:1px solid rgb(61 106 153 / .35);display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:4px 14px;align-items:start}
+.lv{font:700 13px/1 var(--body);padding:6px 0;text-align:center;border-radius:999px;border:1px solid var(--line2);color:var(--soft)}
+.lv.l2{color:var(--amber);border-color:rgb(255 181 71 / .5)}
+.lv.l3{color:var(--bad-hi);border-color:rgb(255 154 158 / .5)}
+.q h3{margin:0;font:600 17px/1.35 var(--body);overflow-wrap:anywhere}
+.q .do{display:flex;gap:2px}
+.opts{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 20px;font-size:15px;color:#b9cde4}
+.opts li{display:flex;gap:8px;min-width:0}
+.opts li>div{overflow-wrap:anywhere;min-width:0}
+.opts li::before{content:"";flex:none;width:16px}
+.opts li.ok{color:var(--good-hi);font-weight:700}
+.opts li.ok::before{content:"✓"}
+.why{margin:8px 0 0;font-size:14px;color:var(--soft);max-width:75ch}
+mark{background:rgb(255 181 71 / .35);color:inherit;border-radius:3px}
+form.edit{margin:14px 0;border:1px solid var(--amber);border-radius:16px;background:var(--panel);padding:20px;display:grid;gap:16px}
+form.edit h3{margin:0;font:800 20px/1.1 var(--display)}
+.f{display:grid;gap:6px;align-content:start;font:600 14px/1.3 var(--body);color:var(--soft);min-width:0}
+.f textarea,.f input,.f select{font:400 16px/1.4 var(--body);color:var(--ink)}
+textarea{resize:vertical;min-height:72px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:8px;min-width:0}
+legend{padding:0;margin-bottom:6px;font:600 14px/1.3 var(--body);color:var(--soft)}
+.opt{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center}
+.opt label{display:grid;place-items:center;height:44px}
+.opt input[type=radio]{width:20px;height:20px;accent-color:var(--good);margin:0}
+.opt:has(:checked) input[type=text]{border-color:var(--good)}
+.err{margin:0;color:var(--bad-hi);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.empty{padding:32px 0;color:var(--soft)}
+.empty strong{display:block;color:var(--ink);font:800 20px/1.2 var(--display);margin-bottom:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16304f;border:1px solid var(--line2);border-radius:24px;padding:10px 12px 10px 20px;display:flex;gap:14px;align-items:center;box-shadow:0 12px 40px rgb(0 0 0 / .5);z-index:20;width:max-content;max-width:calc(100vw - 32px);font-weight:600}
+.toast.bad{border-color:var(--bad);background:#3a1620}
+.toast:not(:has(button)){padding-right:20px}
+.pin{min-height:100vh;display:grid;place-items:center;padding:16px}
+.pin form{display:grid;gap:14px;width:min(360px,100%);text-align:center}
+.pin p{margin:0}
+.pin input{font:800 34px/1 var(--display);letter-spacing:.4em;text-align:center;padding:14px;border-radius:14px}
+.pin .btn{padding:16px;font-size:17px}
+@media (max-width:820px){
+  .cols{grid-template-columns:minmax(0,1fr);gap:20px}
+  .rail{position:static;max-height:none;overflow:visible;gap:12px;padding:0;min-width:0}
+  .rail>div{min-width:0}
+  .topics{display:flex;gap:6px;overflow-x:auto;margin-inline:-16px;padding:2px 16px 6px}
+  .topic{flex:none;border:1px solid var(--line);border-radius:999px;gap:8px;padding:9px 14px}
+  .mixbox{display:none}
+  header .acts .primary{order:-1}
+  .q{grid-template-columns:72px minmax(0,1fr)}
+  .q>div:nth-child(2){grid-column:1/-1;grid-row:2}
+  .q .do{justify-self:end;grid-row:1;grid-column:2}
+  .opts,.two{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" aria-live="polite"></div>
+<script>
+const SUPA_URL = "https://xytrkcqbcynqpdaypbwt.supabase.co", SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5dHJrY3FiY3lucXBkYXlwYnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0OTQ2MjIsImV4cCI6MjEwMDA3MDYyMn0.01tpWKIrYZY3m2XM4fy76dw2dh7Cf5_1mr8Qejl30F8";
+const PIN_HASH = "127fa4a54c3763efd794abc22e2759eb80d47d7b4c14904c8cb7f98a9be9aea3";
+// Same split as the quiz: these topics fill 4 of every 10 questions.
+const CORE = ["UNICEF", "UN", "RAS", "HR", "Team"];
+const PER_GROUP = {1: [1, 3], 2: [2, 2], 3: [1, 1]};   // [core, general] questions one group round uses
+const LV = {1: "Easy", 2: "Medium", 3: "Hard"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const store = {get(k){ try { return localStorage.getItem(k); } catch (e){ return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch (e){} }, del(k){ try { localStorage.removeItem(k); } catch (e){} }};
+async function sha256(s){ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
+
+let pin = "", qs = [], topic = "all", level = 0, find = "", editing = null, busy = false;   // editing: question id, "new", or null
+
+class ApiError extends Error {}
+async function rpc(fn, args){
+  let res;
+  try {
+    res = await fetch(`${SUPA_URL}/rest/v1/rpc/${fn}`, {method: "POST", signal: AbortSignal.timeout(12000),
+      headers: {"Content-Type": "application/json", apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY}, body: JSON.stringify({p_pin: pin, ...args})});
+  } catch (e){ throw new ApiError("offline"); }
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError((data && data.message) || "http " + res.status);
+  return data;
+}
+const explain = e => ({
+  offline: "No connection, so this may not have been saved. Check the internet, press Reload, and try again.",
+  bad_pin: "That PIN is not right.",
+  conflict: "Someone else changed this question in the meantime. Press Reload, then edit it again.",
+  bad_options: "All four answers must be filled in, different, and at most 120 characters.",
+  too_many: "The bank is full (2 000 questions)."
+}[e.message] || "Could not save. " + e.message);
+
+let toastT;
+function toast(text, opt = {}){
+  clearTimeout(toastT);
+  $("#toast").innerHTML = `<div class="toast${opt.bad ? " bad" : ""}"><span>${esc(text)}</span>${opt.undo ? `<button class="btn small" id="undo">Undo</button>` : ""}</div>`;
+  if (opt.undo) $("#undo").addEventListener("click", () => { $("#toast").innerHTML = ""; opt.undo(); });
+  toastT = setTimeout(() => $("#toast").innerHTML = "", opt.undo ? 9000 : opt.bad ? 7000 : 3000);
+}
+
+/* ---------- sign in ---------- */
+async function start(){
+  const saved = store.get("rq-pin");
+  if (saved && await sha256("rq26:" + saved) === PIN_HASH){ pin = saved; return load(); }
+  $("#app").innerHTML = `<div class="pin"><form id="pf"><div class="eyebrow">The Big RAS Quiz</div><h1>Question bank</h1>
+    <label class="f" for="pv">Host PIN</label><input id="pv" type="password" inputmode="numeric" autocomplete="off" maxlength="8" autofocus><p class="err" id="pe"></p><button class="btn primary">Open the question bank</button></form></div>`;
+  $("#pf").addEventListener("submit", async e => {
+    e.preventDefault();
+    const v = $("#pv").value.trim();
+    if (await sha256("rq26:" + v) !== PIN_HASH){ $("#pe").textContent = "That PIN is not right. Try again."; $("#pv").select(); return; }
+    pin = v; store.set("rq-pin", v); load();
+  });
+}
+async function load(again){
+  if (!again) $("#app").innerHTML = `<div class="pin"><p>Loading the questions…</p></div>`;
+  let got;
+  try { got = await rpc("rasquiz_list", {}); }
+  catch (e){
+    if (e.message === "bad_pin"){ store.del("rq-pin"); return start(); }
+    if (again){ toast("Could not reload. " + (e.message === "offline" ? "Check the internet and try again." : e.message), {bad: true}); return; }
+    $("#app").innerHTML = `<div class="pin"><form id="rf"><h1>Can’t reach the question bank</h1><p>${e.message === "offline" ? "Check the internet connection, then try again." : esc(e.message)}</p><button class="btn primary">Try again</button></form></div>`;
+    $("#rf").addEventListener("submit", ev => { ev.preventDefault(); load(); });
+    return;
+  }
+  qs = got;
+  if (again){ editing = null; toast("Questions reloaded"); }
+  shell();
+}
+
+/* ---------- page ---------- */
+const live = () => qs.filter(q => !q.removed);
+const isCore = c => CORE.includes(c);
+function topicsOf(list){
+  const m = new Map(); list.forEach(q => m.set(q.cat, (m.get(q.cat) || 0) + 1));
+  const names = [...m.keys()].sort((a, b) => a.localeCompare(b));
+  return {count: m, core: CORE.filter(c => m.has(c)), rest: names.filter(c => !isCore(c))};
+}
+function shell(){
+  $("#app").innerHTML = `<div class="wrap">
+    <header><div><div class="eyebrow">The Big RAS Quiz</div><h1>Question bank</h1></div>
+      <div class="acts"><button class="btn" data-act="reload">Reload</button><button class="btn" data-act="export">Download a copy</button><button class="btn primary" data-act="new">Add a question</button></div></header>
+    <div class="cols"><nav class="rail" id="rail" aria-label="Topics"></nav>
+      <main><div class="tools"><input type="search" id="find" placeholder="Search questions and answers" aria-label="Search questions and answers">
+        <div class="seg" id="lvseg" role="group" aria-label="Difficulty">${[0, 1, 2, 3].map(l => `<button data-act="level" data-l="${l}">${l ? LV[l] : "All"}</button>`).join("")}</div></div>
+        <div id="list"></div></main></div></div>`;
+  $("#find").value = find;
+  $("#find").addEventListener("input", e => {
+    // typing in the search must not throw away an unsaved edit
+    if (!leave()){ e.target.value = find; return; }
+    editing = null; find = e.target.value; list();
+  });
+  rail(); list();
+}
+function rail(){
+  const T = topicsOf(live()), gone = qs.length - live().length;
+  if (topic === "removed" ? !gone : topic !== "all" && !T.count.has(topic)) topic = "all";
+  const b = (id, name, n) => `<button class="topic" data-act="topic" data-t="${esc(id)}" aria-pressed="${topic === id}">${esc(name)}<span>${n}</span></button>`;
+  const n = (l, c) => live().filter(q => q.lv === l && isCore(q.cat) === c).length;
+  const rounds = Math.min(...[1, 2, 3].flatMap(l => [Math.floor(n(l, true) / PER_GROUP[l][0]), Math.floor(n(l, false) / PER_GROUP[l][1])]));
+  $("#rail").innerHTML = `<div class="topics">${b("all", "All topics", live().length)}</div>
+    <div><h2>UNICEF, UN and RAS</h2><div class="topics">${T.core.map(c => b(c, c, T.count.get(c))).join("")}</div></div>
+    <div><h2>General</h2><div class="topics">${T.rest.map(c => b(c, c, T.count.get(c))).join("")}</div></div>
+    ${gone ? `<div class="topics">${b("removed", "Removed", gone)}</div>` : ""}
+    <div class="mixbox"><h2>Question mix</h2><table class="mix"><thead><tr><td></td><th scope="col">UN &amp; RAS</th><th scope="col">General</th></tr></thead><tbody>${[1, 2, 3].map(l => `<tr><th scope="row">${LV[l]}</th><td>${n(l, true)}</td><td>${n(l, false)}</td></tr>`).join("")}</tbody></table>
+      <p class="note">Enough for ${rounds} group rounds at the usual mix. The final draws from what is left.</p></div>`;
+  document.querySelectorAll("#lvseg button").forEach(x => x.setAttribute("aria-pressed", +x.dataset.l === level));
+}
+function hit(s){
+  const f = find.trim(); if (!f) return esc(s);
+  const i = s.toLowerCase().indexOf(f.toLowerCase());
+  return i < 0 ? esc(s) : esc(s.slice(0, i)) + "<mark>" + esc(s.slice(i, i + f.length)) + "</mark>" + esc(s.slice(i + f.length));
+}
+function shownList(){
+  const f = find.trim().toLowerCase();
+  return qs.filter(q => (topic === "removed" ? q.removed : !q.removed && (topic === "all" || q.cat === topic))
+    && (!level || q.lv === level)
+    && (!f || [q.t, q.x, q.cat, ...q.o].some(s => s.toLowerCase().includes(f))));
+}
+function card(q){
+  if (editing === q.id) return form(q);
+  return `<article class="q" id="q-${q.id}"><span class="lv l${q.lv}">${LV[q.lv]}</span>
+    <div><h3>${hit(q.t)}</h3><ul class="opts">${q.o.map((o, i) => `<li${i === q.a ? ` class="ok"` : ""}><div>${hit(o)}</div></li>`).join("")}</ul>${q.x ? `<p class="why">${hit(q.x)}</p>` : ""}</div>
+    <div class="do">${q.removed ? `<button class="btn small" data-act="restore" data-id="${q.id}">Put back</button>`
+      : `<button class="btn small" data-act="edit" data-id="${q.id}">Edit</button><button class="btn small quiet" data-act="remove" data-id="${q.id}">Remove</button>`}</div></article>`;
+}
+function list(){
+  const show = shownList(), T = topicsOf(show), order = [...T.core, ...T.rest];
+  let html = editing === "new" ? form({id: "", cat: ["all", "removed"].includes(topic) ? "" : topic, lv: level || 2, t: "", o: ["", "", "", ""], a: 0, x: ""}) : "";
+  html += order.map(c => {
+    const g = show.filter(q => q.cat === c).sort((a, b) => a.lv - b.lv || a.t.localeCompare(b.t));
+    const parts = [1, 2, 3].map(l => [l, g.filter(q => q.lv === l).length]).filter(p => p[1]).map(([l, n]) => `${n} ${LV[l].toLowerCase()}`).join(" · ");
+    return `<section class="group"><div class="ghead"><h2>${esc(c)}</h2><p>${g.length} question${g.length === 1 ? "" : "s"} · ${parts}</p></div>${g.map(card).join("")}</section>`;
+  }).join("");
+  if (!show.length && editing !== "new") html = `<div class="empty"><strong>No questions here</strong>${find || level ? "Try another word or difficulty." : "Add the first one with “Add a question”."}</div>`;
+  $("#list").innerHTML = html;
+}
+
+/* ---------- edit form ---------- */
+function form(q){
+  const names = [...new Set([...CORE, ...qs.map(x => x.cat)])].sort((a, b) => (isCore(b) - isCore(a)) || a.localeCompare(b));
+  const optn = c => `<option${c === q.cat ? " selected" : ""}>${esc(c)}</option>`;
+  return `<form class="edit" id="ef" data-id="${q.id}" data-rev="${q.rev || 0}" novalidate><h3>${q.id ? "Edit question" : "New question"}</h3>
+    <div class="two"><div class="f"><label for="fcat">Topic</label><select id="fcat"><option value=""${q.cat ? "" : " selected"} disabled>Choose a topic</option>
+        <optgroup label="UNICEF, UN and RAS">${names.filter(isCore).map(optn).join("")}</optgroup>
+        <optgroup label="General">${names.filter(c => !isCore(c)).map(optn).join("")}</optgroup><option value="+">New topic…</option></select>
+        <input type="text" id="fnew" maxlength="30" placeholder="Name of the new topic" aria-label="Name of the new topic" hidden></div>
+      <div class="f"><span>Difficulty</span><div class="seg" role="group" aria-label="Difficulty of this question">${[1, 2, 3].map(l => `<button type="button" data-act="flv" data-l="${l}" aria-pressed="${q.lv === l}">${LV[l]}</button>`).join("")}</div></div></div>
+    <label class="f">Question<textarea id="ft" maxlength="300" rows="2">${esc(q.t)}</textarea></label>
+    <fieldset><legend>Answers. Mark the correct one. The quiz shuffles them, or sorts them if they are all numbers.</legend>
+      ${q.o.map((o, i) => `<div class="opt"><label><input type="radio" name="fa" value="${i}" aria-label="Answer ${i + 1} is correct"${i === q.a ? " checked" : ""}></label><input type="text" class="fo" maxlength="120" value="${esc(o)}" aria-label="Answer ${i + 1}"></div>`).join("")}</fieldset>
+    <label class="f">“Did you know?” text, shown after the answer<textarea id="fx" maxlength="500" rows="2">${esc(q.x)}</textarea></label>
+    <p class="err" id="fe" role="alert"></p>
+    <div class="row"><button type="button" class="btn" data-act="cancel">Cancel</button><button class="btn primary" id="fs">${q.id ? "Save changes" : "Add question"}</button></div></form>`;
+}
+function readForm(){
+  const f = $("#ef"), sel = $("#fcat").value, tidy = s => s.trim().replace(/\s+/g, " ");
+  return {id: f.dataset.id || null, rev: +f.dataset.rev, cat: tidy(sel === "+" ? $("#fnew").value : sel),
+    lv: +f.querySelector('[data-act="flv"][aria-pressed="true"]').dataset.l, t: tidy($("#ft").value),
+    o: [...f.querySelectorAll(".fo")].map(i => tidy(i.value)), a: +f.querySelector("[name=fa]:checked").value, x: tidy($("#fx").value)};
+}
+function problem(q){
+  if (!q.cat) return "Choose a topic.";
+  if (!q.t) return "Write the question.";
+  if (q.o.some(o => !o)) return "Fill in all four answers.";
+  if (new Set(q.o.map(o => o.toLowerCase())).size < 4) return "Two answers are the same. Make all four different.";
+  const same = qs.find(x => x.id !== q.id && !x.removed && x.t.toLowerCase() === q.t.toLowerCase());
+  if (same) return `This question is already in the bank, under ${same.cat}.`;
+  return "";
+}
+let original = "";
+const dirty = () => !!(editing && $("#ef") && JSON.stringify(readForm()) !== original);
+const leave = () => !dirty() || confirm("Leave without saving your changes?");
+function openForm(id){
+  if (!leave()) return;
+  editing = id;
+  if (id === "new" && topic === "removed"){ topic = "all"; rail(); }
+  list(); original = JSON.stringify(readForm());
+  $("#ef").scrollIntoView({block: "center"});
+  (id === "new" && !$("#fcat").value ? $("#fcat") : $("#ft")).focus({preventScroll: true});
+}
+function put(q){ const i = qs.findIndex(x => x.id === q.id); if (i < 0) qs.push(q); else qs[i] = q; }
+async function save(){
+  if (busy) return;
+  const q = readForm(), p = problem(q), f = $("#ef");
+  if (p){ $("#fe").textContent = p; return; }
+  // a new topic typed with other capitals is the same topic
+  const known = [...CORE, ...qs.map(x => x.cat)].find(c => c.toLowerCase() === q.cat.toLowerCase()); if (known) q.cat = known;
+  busy = true; $("#fs").disabled = true; $("#fs").textContent = "Saving…"; $("#fe").textContent = "";
+  try {
+    const r = await rpc("rasquiz_save", {p_q: q});
+    put(r);
+    if ($("#ef") === f){
+      editing = null;
+      if (topic !== "all" && topic !== r.cat) topic = r.cat;
+      if (level && level !== r.lv) level = 0;
+      if (!shownList().includes(r)){ find = ""; $("#find").value = ""; }
+      rail(); list();
+      const el = document.getElementById("q-" + r.id); if (el) el.scrollIntoView({block: "center"});
+    }
+    toast(q.id ? "Changes saved" : "Question added");
+  } catch (e){
+    if ($("#ef") === f){ $("#fe").textContent = explain(e); $("#fs").disabled = false; $("#fs").textContent = q.id ? "Save changes" : "Add question"; }
+    else toast(explain(e), {bad: true});
+  }
+  busy = false;
+}
+async function setRemoved(id, removed){
+  try { put(await rpc("rasquiz_set_removed", {p_id: id, p_removed: removed})); }
+  catch (e){ toast(explain(e), {bad: true}); return; }
+  rail(); if (!editing) list();
+  toast(removed ? "Question removed" : "Question is back in the quiz", removed ? {undo: () => setRemoved(id, false)} : {});
+}
+function download(){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(qs, null, 1)], {type: "application/json"}));
+  a.download = `ras-quiz-questions-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+/* ---------- input ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const id = b.dataset.id;
+  switch (b.dataset.act){
+    case "topic": if (!leave()) return; editing = null; topic = b.dataset.t; rail(); list(); scrollTo({top: 0}); break;
+    case "level": if (!leave()) return; editing = null; level = +b.dataset.l; rail(); list(); break;
+    case "new": openForm("new"); break;
+    case "edit": openForm(id); break;
+    case "cancel": if (!leave()) return; editing = null; list(); break;
+    case "remove": if (!leave()) return; editing = null; setRemoved(id, true); break;
+    case "restore": setRemoved(id, false); break;
+    case "reload": if (leave()) load(true); break;
+    case "export": download(); break;
+    case "flv": b.parentNode.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); break;
+  }
+});
+document.addEventListener("submit", e => { if (e.target.id === "ef"){ e.preventDefault(); save(); } });
+document.addEventListener("change", e => { if (e.target.id === "fcat"){ const n = $("#fnew"); n.hidden = e.target.value !== "+"; if (!n.hidden) n.focus(); } });
+document.addEventListener("input", e => { if (e.target.closest("#ef") && $("#fe")) $("#fe").textContent = ""; });
+addEventListener("beforeunload", e => { if (dirty()) e.preventDefault(); });
+start();
+</script>
+</body>
+</html>
