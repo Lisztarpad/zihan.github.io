@@ -263,6 +263,19 @@ button.a{cursor:pointer}
 .phone .ptxt{font:800 22px/1.25 var(--display);margin:0;text-wrap:balance}
 .phone .btns{display:grid;gap:12px;margin-top:auto}
 .phone .btn{display:flex;align-items:center;gap:14px;padding:16px 18px;min-height:62px;font:600 18px/1.2 var(--body);text-align:left;background:linear-gradient(180deg,var(--tile1),var(--tile2));border:2px solid var(--line);border-radius:40px;cursor:pointer;transition:background .2s,opacity .2s}
+.langs{display:grid;gap:10px}
+.langs button{display:flex;align-items:center;gap:16px;border:2px solid var(--line);background:linear-gradient(180deg,var(--tile1),var(--tile2));color:var(--ink);border-radius:18px;padding:14px 18px;min-height:58px;font:700 19px/1.2 var(--body);cursor:pointer;text-align:left;direction:ltr}
+.langs button.on{border-color:var(--amber)}
+.flag{flex:none;width:39px;height:26px;border-radius:4px;display:block;box-shadow:0 0 0 1px rgb(255 255 255 / .25)}
+.langbox{position:relative;align-self:flex-end;margin:-6px 0 -8px;z-index:5}
+.langbtn{display:flex;align-items:center;gap:8px;background:var(--tile2);color:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 8px;font:600 14px/1.1 var(--body);cursor:pointer;direction:ltr}
+.langbtn .flag{width:24px;height:16px;border-radius:3px}
+.langbox .langs{position:absolute;inset-inline-end:0;top:calc(100% + 8px);width:min(250px,78vw);padding:10px;gap:6px;border-radius:18px;background:#0f1d30;border:1px solid var(--line);box-shadow:0 14px 40px rgb(0 0 0 / .6)}
+.langbox .langs button{min-height:48px;padding:9px 12px;font-size:17px;border-width:1px;border-radius:12px}
+.phone[dir=rtl] .btn,.phone[dir=rtl] .nbtn{text-align:right}
+.phone[dir=rtl] .me .sw,.phone[dir=rtl] .mini li b{margin-left:0;margin-right:auto}
+.phone[dir=rtl] .pq,.phone[dir=rtl] .eyebrow,.phone[dir=rtl] .pwhy b{letter-spacing:0}
+.phone:lang(zh) .ptxt,.phone:lang(ar) .ptxt{line-height:1.4}
 .phone .btn b{flex:none;width:22px;font:800 20px/1 var(--display);color:var(--amber)}
 .phone .btn:disabled{cursor:default}
 .phone .btn.sel{background:linear-gradient(180deg,var(--amber),var(--amber2));color:var(--amber-ink);border-color:var(--amber-hi)}
@@ -486,7 +499,26 @@ function decodeBank(){
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
+// Translations of the questions for the phones (i18n.txt, made together with the question bank). A question edited later is
+// shown in English: its text no longer matches the one that was translated.
+var TRANS = {};
+function fnv(s){ let h = 0x811c9dc5; for (const b of new TextEncoder().encode(s)){ h ^= b; h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(36); }
+async function loadTrans(left = 4){
+  try {
+    const r = await fetch("i18n.txt", {signal: AbortSignal.timeout(20000)}); if (!r.ok) throw 0;
+    const key = "ras-retreat-2026", bin = atob((await r.text()).trim()), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+    TRANS = JSON.parse(new TextDecoder().decode(bytes));
+  } catch (e){ if (left > 1) setTimeout(() => loadTrans(left - 1), 4000); }
+}
+function transOf(q, opts){
+  const e = TRANS[q.id]; if (!e || e.h !== fnv(q.t + "|" + q.o.join("|"))) return undefined;
+  const out = {}; for (const l in e) if (l !== "h") out[l] = [e[l][0], ...opts.map(k => e[l][k + 1])];
+  return out;
+}
+
 function startHost(pin, loaded){
+  loadTrans();
   // byId also keeps removed and built-in questions, so a round already under way never loses its question
   let bank = [], bankSrc = "", bankAt = 0, bankBusy = false;
   const byId = new Map(decodeBank().map(q => [q.id, q]));
@@ -711,7 +743,7 @@ function startHost(pin, loaded){
     const c = H.cur;
     if (c && (H.phase === "q" || H.phase === "reveal")){
       const q = byId.get(c.qid);
-      S.cur = {r: c.r, i: c.i, n: c.qs.length, qid: c.qid, text: q.t, opts: c.opts.map(k => q.o[k]),
+      S.cur = {r: c.r, i: c.i, n: c.qs.length, qid: c.qid, text: q.t, opts: c.opts.map(k => q.o[k]), tr: transOf(q, c.opts),
         remain: H.phase === "q" ? Math.max(0, c.deadline - Date.now()) : 0, answered: Object.keys(c.answers)};
       if (H.phase === "reveal") Object.assign(S.cur, {correct: c.last.correct, dist: c.last.dist, score: Object.fromEntries(Object.entries(c.p).map(([n, p]) => [n, p.s])), why: q.x || ""});
     }
@@ -726,7 +758,7 @@ function startHost(pin, loaded){
       const f = H.final.cur;
       if (f && ["fq", "flock", "freveal"].includes(H.phase)){
         const q = byId.get(f.qid);
-        S.fin = {name: f.name, rung: f.rung, qid: f.qid, text: q.t, opts: f.opts.map(k => q.o[k]), pick: f.pick,
+        S.fin = {name: f.name, rung: f.rung, qid: f.qid, text: q.t, opts: f.opts.map(k => q.o[k]), tr: transOf(q, f.opts), pick: f.pick,
           remain: f.paused !== null ? f.paused : Math.max(0, f.deadline - Date.now()), paused: f.paused !== null,
           life: H.final.st[f.name].life, points: H.final.st[f.name].points};
         if (H.phase === "freveal") Object.assign(S.fin, {correct: f.correct, ok: f.ok, why: q.x || ""});
@@ -1024,23 +1056,52 @@ function startHost(pin, loaded){
   // phase changes go out at once; answers and phones coming and going are batched
   setInterval(() => { if (Date.now() - lastPub >= (dirty ? 1400 : 2000)) publish(); }, 200);
   setInterval(() => { const k = [...onlineNames()].sort().join("|"); if (k !== lastOnlineKey && ["lobby", "q", "reveal"].includes(H.phase)) render(); }, 1500);
-  window.__quiz = {get H(){ return H; }, get bank(){ return bank; }, get src(){ return bankSrc; }};   // for testing from the console
+  window.__quiz = {get H(){ return H; }, get trans(){ return TRANS; }, get bank(){ return bank; }, get src(){ return bankSrc; }};   // for testing from the console
 }
 
 /* ======================================================================
    PHONE: pick your name, answer when it is your turn, watch otherwise
    ====================================================================== */
 function phoneMain(){
+  const LANGS = {en: "English", fr: "Français", es: "Español", ru: "Русский", ar: "العربية", zh: "中文"};
+  const UI = {"en":{"lang":"Language","typecode":"Type the code from the big screen","join":"Join","codenum":"The code is 4 letters, not numbers. Are you the host?","openhost":"Open the host screen","codebad":"The code is the 4 letters on the big screen.","connecting":"Connecting…","waiting":"Waiting for the big screen. Keep this page open.","slow":"The big screen isn’t answering. Is {0} the code it shows?","recode":"Type another code","notyou":"Not you?","group":"Group {0}","roundq":"Round {0} · question {1} of {2}","tap":"Tap your answer. You can’t change it.","locked":"Locked in · {0}","sending":"Sending…","noans":"No answer this time","late":"Your answer arrived too late","correct":"Correct!","notthis":"Not this time · it was {0}","right":"{0} right this round","dyk":"Did you know?","afterlast":"After the last round","after":"After round {0} of {1}","youwon":"You won your group!","seefinal":"See you in the final.","goes":"{0} goes to the final","place":"You are number {0} of {1} in your group. Your group is number {2} of {3}.","none":"No answers from you yet. Join the next round!","finalnext":"The final is next.","keep":"Keep this page, or scan the code again when you’re back.","yourgroup":"Your group","allgroups":"All groups · average right answers","yourq":"Your question {0} · {1} pts","theirq":"{0} · question {1}","climbok":"Correct! {0} points","climbend":"The climb ends on {0} points","audience":"Ask the audience: listen to the room, then tap","tap2":"Tap your answer","wrong":"Wrong answer.","answeris":"The answer is {0} · {1}","asking":"{0} is asking the audience. Give your advice out loud!","watch":"Watch the big screen.","final":"The final","upnext":"You’re up next!","isnext":"{0} is up next","ready":"Get ready. The questions will appear here.","champ":"Champion","wonquiz":"You won the Big RAS Quiz!","points":"{0} points","youin":"You’re in","intro":"Everyone plays at the same time: {0} rounds of {1} questions, with a break after each one. Keep this page open; questions appear here.","almost":"Almost ready","nogroups":"The host hasn’t loaded the groups yet. Keep this page open.","who":"Who are you?","search":"Search your name","brk":"Break · {0} left","finalsoon":"The final starts soon","again":"We’re starting again","paused":"paused","sec":"{0}s","lost":"Lost contact with the big screen. Reconnecting…"},"fr":{"lang":"Langue","typecode":"Saisissez le code affiché à l’écran","join":"Rejoindre","codenum":"Le code a 4 lettres, pas de chiffres. Vous animez le quiz ?","openhost":"Ouvrir l’écran de l’animateur","codebad":"Le code est formé des 4 lettres à l’écran.","connecting":"Connexion…","waiting":"En attente du grand écran. Gardez cette page ouverte.","slow":"Le grand écran ne répond pas. Le code affiché est-il {0} ?","recode":"Saisir un autre code","notyou":"Pas vous ?","group":"Groupe {0}","roundq":"Manche {0} · question {1} sur {2}","tap":"Touchez votre réponse. Elle est définitive.","locked":"Réponse enregistrée · {0}","sending":"Envoi…","noans":"Pas de réponse cette fois","late":"Votre réponse est arrivée trop tard","correct":"Bonne réponse !","notthis":"Raté · c’était {0}","right":"Justes dans cette manche : {0}","dyk":"Le saviez-vous ?","afterlast":"Après la dernière manche","after":"Après la manche {0} sur {1}","youwon":"Vous avez remporté votre groupe !","seefinal":"Rendez-vous en finale.","goes":"{0} va en finale","place":"Vous êtes n° {0} sur {1} dans votre groupe. Votre groupe est n° {2} sur {3}.","none":"Pas encore de réponse de votre part. Participez à la prochaine manche !","finalnext":"Place à la finale.","keep":"Gardez cette page, ou rescannez le code à votre retour.","yourgroup":"Votre groupe","allgroups":"Tous les groupes · moyenne de bonnes réponses","yourq":"Votre question {0} · {1} pts","theirq":"{0} · question {1}","climbok":"Bonne réponse ! {0} points","climbend":"L’ascension s’arrête à {0} points","audience":"L’avis du public : écoutez la salle, puis touchez","tap2":"Touchez votre réponse","wrong":"Mauvaise réponse.","answeris":"La réponse est {0} · {1}","asking":"{0} demande l’avis du public. Donnez le vôtre à voix haute !","watch":"Regardez le grand écran.","final":"La finale","upnext":"C’est à vous !","isnext":"Au tour de {0}","ready":"Préparez-vous. Les questions s’afficheront ici.","champ":"Champion","wonquiz":"Vous avez gagné le Big RAS Quiz !","points":"{0} points","youin":"C’est bon, vous y êtes","intro":"Tout le monde joue en même temps : {0} manches de {1} questions, avec une pause après chacune. Gardez cette page ouverte ; les questions s’affichent ici.","almost":"Presque prêt","nogroups":"Les groupes ne sont pas encore chargés. Gardez cette page ouverte.","who":"Qui êtes-vous ?","search":"Cherchez votre nom","brk":"Pause · encore {0}","finalsoon":"La finale commence bientôt","again":"On reprend","paused":"en pause","sec":"{0} s","lost":"Contact perdu avec le grand écran. Reconnexion…"},"es":{"lang":"Idioma","typecode":"Escribe el código de la pantalla","join":"Entrar","codenum":"El código son 4 letras, no números. ¿Eres el anfitrión?","openhost":"Abrir la pantalla del anfitrión","codebad":"El código son las 4 letras de la pantalla.","connecting":"Conectando…","waiting":"Esperando a la pantalla. Deja esta página abierta.","slow":"La pantalla no responde. ¿El código que muestra es {0}?","recode":"Escribir otro código","notyou":"¿No eres tú?","group":"Grupo {0}","roundq":"Ronda {0} · pregunta {1} de {2}","tap":"Toca tu respuesta. No podrás cambiarla.","locked":"Respuesta registrada · {0}","sending":"Enviando…","noans":"Sin respuesta esta vez","late":"Tu respuesta llegó tarde","correct":"¡Correcto!","notthis":"Esta vez no · era {0}","right":"Aciertos en esta ronda: {0}","dyk":"¿Sabías que…?","afterlast":"Tras la última ronda","after":"Tras la ronda {0} de {1}","youwon":"¡Has ganado en tu grupo!","seefinal":"Nos vemos en la final.","goes":"{0} va a la final","place":"Eres n.º {0} de {1} en tu grupo. Tu grupo es n.º {2} de {3}.","none":"Aún no has respondido. ¡Únete a la próxima ronda!","finalnext":"Ahora viene la final.","keep":"Conserva esta página o vuelve a escanear el código.","yourgroup":"Tu grupo","allgroups":"Todos los grupos · media de aciertos","yourq":"Tu pregunta {0} · {1} ptos.","theirq":"{0} · pregunta {1}","climbok":"¡Correcto! {0} puntos","climbend":"La escalada termina en {0} puntos","audience":"Pregunta al público: escucha y toca","tap2":"Toca tu respuesta","wrong":"Respuesta incorrecta.","answeris":"La respuesta es {0} · {1}","asking":"{0} pregunta al público. ¡Da tu consejo en voz alta!","watch":"Mira la pantalla.","final":"La final","upnext":"¡Te toca!","isnext":"Turno de {0}","ready":"Prepárate. Las preguntas aparecerán aquí.","champ":"Campeón","wonquiz":"¡Has ganado el Big RAS Quiz!","points":"{0} puntos","youin":"Ya estás dentro","intro":"Todos juegan a la vez: {0} rondas de {1} preguntas, con una pausa tras cada una. Deja esta página abierta; las preguntas aparecen aquí.","almost":"Casi listo","nogroups":"Los grupos aún no están cargados. Deja esta página abierta.","who":"¿Quién eres?","search":"Busca tu nombre","brk":"Pausa · quedan {0}","finalsoon":"La final empieza pronto","again":"Volvemos a empezar","paused":"en pausa","sec":"{0} s","lost":"Se perdió el contacto con la pantalla. Reconectando…"},"ru":{"lang":"Язык","typecode":"Введите код с большого экрана","join":"Войти","codenum":"Код — 4 буквы, не цифры. Вы ведущий?","openhost":"Открыть экран ведущего","codebad":"Код — 4 буквы на большом экране.","connecting":"Подключение…","waiting":"Ждём большой экран. Не закрывайте страницу.","slow":"Большой экран не отвечает. На нём код {0}?","recode":"Ввести другой код","notyou":"Не вы?","group":"Группа {0}","roundq":"Раунд {0} · вопрос {1} из {2}","tap":"Выберите ответ. Изменить его нельзя.","locked":"Ответ принят · {0}","sending":"Отправка…","noans":"На этот раз без ответа","late":"Ответ пришёл слишком поздно","correct":"Верно!","notthis":"Не в этот раз · верно: {0}","right":"Верно в раунде: {0}","dyk":"Знаете ли вы?","afterlast":"После последнего раунда","after":"После раунда {0} из {1}","youwon":"Вы победили в своей группе!","seefinal":"До встречи в финале.","goes":"{0} выходит в финал","place":"Вы на месте {0} из {1} в группе. Ваша группа на месте {2} из {3}.","none":"Ваших ответов пока нет. Присоединяйтесь в следующем раунде!","finalnext":"Дальше — финал.","keep":"Не закрывайте страницу или снова отсканируйте код.","yourgroup":"Ваша группа","allgroups":"Все группы · среднее число верных ответов","yourq":"Ваш вопрос {0} · {1} очк.","theirq":"{0} · вопрос {1}","climbok":"Верно! Очки: {0}","climbend":"Подъём окончен. Очки: {0}","audience":"Помощь зала: послушайте и выберите","tap2":"Выберите ответ","wrong":"Неверно.","answeris":"Ответ: {0} · {1}","asking":"{0} просит помощи зала. Подскажите вслух!","watch":"Смотрите на большой экран.","final":"Финал","upnext":"Вы следующий участник!","isnext":"Далее: {0}","ready":"Приготовьтесь. Вопросы появятся здесь.","champ":"Чемпион","wonquiz":"Вы выиграли Big RAS Quiz!","points":"Очки: {0}","youin":"Вы в игре","intro":"Все играют одновременно: раундов — {0}, вопросов в каждом — {1}, после каждого перерыв. Не закрывайте страницу: вопросы появятся здесь.","almost":"Почти готово","nogroups":"Группы ещё не загружены. Не закрывайте страницу.","who":"Кто вы?","search":"Найдите своё имя","brk":"Перерыв · осталось {0}","finalsoon":"Финал скоро начнётся","again":"Продолжаем","paused":"пауза","sec":"{0} с","lost":"Связь с большим экраном потеряна. Переподключение…"},"ar":{"lang":"اللغة","typecode":"أدخل الرمز الظاهر على الشاشة الكبيرة","join":"انضمام","codenum":"الرمز 4 أحرف لاتينية وليس أرقامًا. هل أنت المضيف؟","openhost":"افتح شاشة المضيف","codebad":"الرمز هو الأحرف الأربعة على الشاشة الكبيرة.","connecting":"جارٍ الاتصال…","waiting":"بانتظار الشاشة الكبيرة. أبقِ هذه الصفحة مفتوحة.","slow":"الشاشة الكبيرة لا تستجيب. هل الرمز الظاهر هو {0}؟","recode":"أدخل رمزًا آخر","notyou":"لست أنت؟","group":"المجموعة {0}","roundq":"الجولة {0} · السؤال {1} من {2}","tap":"اختر إجابتك. لا يمكنك تغييرها.","locked":"تم التسجيل · {0}","sending":"جارٍ الإرسال…","noans":"لا إجابة هذه المرة","late":"وصلت إجابتك متأخرة","correct":"إجابة صحيحة!","notthis":"ليس هذه المرة · الصواب {0}","right":"الصحيح في هذه الجولة: {0}","dyk":"هل تعلم؟","afterlast":"بعد الجولة الأخيرة","after":"بعد الجولة {0} من {1}","youwon":"لقد فزت في مجموعتك!","seefinal":"نراك في النهائي.","goes":"{0} إلى النهائي","place":"ترتيبك {0} من {1} في مجموعتك. ترتيب مجموعتك {2} من {3}.","none":"لا إجابات منك بعد. شارك في الجولة التالية!","finalnext":"النهائي هو التالي.","keep":"أبقِ هذه الصفحة، أو امسح الرمز مجددًا عند عودتك.","yourgroup":"مجموعتك","allgroups":"كل المجموعات · متوسط الإجابات الصحيحة","yourq":"سؤالك {0} · {1} نقطة","theirq":"{0} · السؤال {1}","climbok":"صحيح! {0} نقطة","climbend":"انتهى الصعود عند {0} نقطة","audience":"اسأل الجمهور: استمع ثم اختر","tap2":"اختر إجابتك","wrong":"إجابة خاطئة.","answeris":"الإجابة {0} · {1}","asking":"{0} يستعين بالجمهور. قدّم رأيك بصوت عالٍ!","watch":"تابع الشاشة الكبيرة.","final":"النهائي","upnext":"دورك الآن!","isnext":"التالي: {0}","ready":"استعد. ستظهر الأسئلة هنا.","champ":"البطل","wonquiz":"لقد فزت في Big RAS Quiz!","points":"{0} نقطة","youin":"تم الانضمام","intro":"يلعب الجميع في الوقت نفسه: {0} جولات من {1} سؤالًا، مع استراحة بعد كل جولة. أبقِ هذه الصفحة مفتوحة؛ ستظهر الأسئلة هنا.","almost":"نكاد نبدأ","nogroups":"لم تُحمَّل المجموعات بعد. أبقِ هذه الصفحة مفتوحة.","who":"من أنت؟","search":"ابحث عن اسمك","brk":"استراحة · بقي {0}","finalsoon":"يبدأ النهائي قريبًا","again":"نبدأ من جديد","paused":"متوقف","sec":"{0} ث","lost":"انقطع الاتصال بالشاشة الكبيرة. جارٍ إعادة الاتصال…"},"zh":{"lang":"语言","typecode":"输入大屏幕上的代码","join":"加入","codenum":"代码是4个字母，不是数字。您是主持人吗？","openhost":"打开主持页面","codebad":"代码是大屏幕上的4个字母。","connecting":"正在连接…","waiting":"正在等待大屏幕。请不要关闭此页面。","slow":"大屏幕没有响应。屏幕上的代码是 {0} 吗？","recode":"输入其他代码","notyou":"不是您？","group":"第{0}组","roundq":"第{0}轮 · 第{1}题，共{2}题","tap":"点选答案，选后不能更改。","locked":"已锁定 · {0}","sending":"正在发送…","noans":"这次没有作答","late":"您的答案到得太晚了","correct":"答对了！","notthis":"没答对 · 正确答案是 {0}","right":"本轮答对 {0} 题","dyk":"你知道吗？","afterlast":"最后一轮结束","after":"第{0}轮结束，共{1}轮","youwon":"您是本组第一名！","seefinal":"决赛见。","goes":"{0} 进入决赛","place":"您在组内排第 {0}（共 {1} 人）。您的小组排第 {2}（共 {3} 组）。","none":"您还没有作答，下一轮加入吧！","finalnext":"接下来是决赛。","keep":"请保留此页面，或回来后重新扫码。","yourgroup":"您的小组","allgroups":"各组 · 平均答对题数","yourq":"您的第{0}题 · {1} 分","theirq":"{0} · 第{1}题","climbok":"答对了！{0} 分","climbend":"挑战结束，得 {0} 分","audience":"求助观众：听听大家的意见，再点选","tap2":"点选答案","wrong":"答错了。","answeris":"答案是 {0} · {1}","asking":"{0} 正在求助观众。请大声说出您的建议！","watch":"请看大屏幕。","final":"决赛","upnext":"下一位就是您！","isnext":"下一位：{0}","ready":"请准备，题目会显示在这里。","champ":"冠军","wonquiz":"您赢得了 Big RAS Quiz！","points":"{0} 分","youin":"您已加入","intro":"所有人同时作答：共{0}轮，每轮{1}题，每轮后休息。请保持此页面打开，题目会显示在这里。","almost":"马上就好","nogroups":"主持人还没有载入分组。请不要关闭此页面。","who":"您是谁？","search":"搜索您的姓名","brk":"休息 · 还剩 {0}","finalsoon":"决赛即将开始","again":"即将继续","paused":"已暂停","sec":"{0} 秒","lost":"与大屏幕失去联系，正在重新连接…"}};
+  const FLAGS = {
+    en: '<path fill="#012169" d="M0 0h60v40H0z"/><path stroke="#fff" stroke-width="8" d="m0 0 60 40M60 0 0 40"/><path stroke="#C8102E" stroke-width="3" d="m0 0 60 40M60 0 0 40"/><path stroke="#fff" stroke-width="13" d="M30 0v40M0 20h60"/><path stroke="#C8102E" stroke-width="8" d="M30 0v40M0 20h60"/>',
+    fr: '<path fill="#fff" d="M0 0h60v40H0z"/><path fill="#002395" d="M0 0h20v40H0z"/><path fill="#ED2939" d="M40 0h20v40H40z"/>',
+    es: '<path fill="#AA151B" d="M0 0h60v40H0z"/><path fill="#F1BF00" d="M0 10h60v20H0z"/>',
+    ru: '<path fill="#fff" d="M0 0h60v40H0z"/><path fill="#0039A6" d="M0 13.33h60V40H0z"/><path fill="#D52B1E" d="M0 26.67h60V40H0z"/>',
+    ar: '<path fill="#fff" d="M0 0h60v40H0z"/><path fill="#00732F" d="M0 0h60v13.33H0z"/><path fill="#000" d="M0 26.67h60V40H0z"/><path fill="#f00" d="M0 0h15v40H0z"/>',
+    zh: '<path fill="#EE1C25" d="M0 0h60v40H0z"/><path fill="#FF0" d="m10 4 1.76 5.57h5.85l-4.73 3.44 1.8 5.56L10 15.13l-4.68 3.44 1.8-5.56-4.73-3.44h5.85z"/><g fill="#FF0"><circle cx="20.5" cy="4.2" r="1.5"/><circle cx="24.2" cy="8" r="1.5"/><circle cx="24.2" cy="13.6" r="1.5"/><circle cx="20.5" cy="17.4" r="1.5"/></g>'};
+  const flag = l => `<svg class="flag" viewBox="0 0 60 40" aria-hidden="true">${FLAGS[l]}</svg>`;
+  let lang = store.get("rq-lang"); if (!LANGS[lang]) lang = "en";
+  const tt = (k, ...a) => (UI[lang][k] || UI.en[k]).replace(/[{]([0-9])[}]/g, (m, i) => a[i]);
+  const wrap = html => `<div class="phone" lang="${lang}" dir="${lang === "ar" ? "rtl" : "ltr"}">${html}</div>`;
+  const langs = () => `<div class="langs" role="group" aria-label="${tt("lang")}">${Object.entries(LANGS).map(([l, n]) => `<button type="button" lang="${l}" data-lang="${l}"${l === lang ? ' class="on" aria-pressed="true"' : ""}>${flag(l)}<span>${n}</span></button>`).join("")}</div>`;
+  let langOpen = false;   // the list under the language button, while playing
+  const langsel = () => `<div class="langbox"><button type="button" class="langbtn" data-langopen aria-expanded="${langOpen}" aria-label="${tt("lang")}">${flag(lang)}<span>${LANGS[lang]}</span><span aria-hidden="true">▾</span></button>${langOpen ? langs() : ""}</div>`;
+  const inLang = x => lang !== "en" && x.tr && x.tr[lang] ? {text: x.tr[lang][0], opts: x.tr[lang].slice(1)} : {text: x.text, opts: x.opts};
+  let redraw = () => {};
+  function setLang(l){ if (!LANGS[l]) return; lang = l; langOpen = false; store.set("rq-lang", l); langDone(); redraw(); }
+  let langDone = () => {};
+  app.addEventListener("click", e => {
+    const b = e.target.closest("[data-lang]");
+    if (b) setLang(b.dataset.lang);
+    else if (e.target.closest("[data-langopen]")){ langOpen = !langOpen; redraw(); }
+    else if (langOpen){ langOpen = false; redraw(); }
+  });
   let code = (location.hash.slice(1) || "").toUpperCase();
   if (!/^[A-Z]{4}$/.test(code)){
-    app.innerHTML = `<div class="phone"><div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div>
-      <form class="codein" id="cf"><label for="cv">Type the code from the big screen</label><input id="cv" maxlength="4" autocomplete="off" autocapitalize="characters"><p class="cerr" id="ce" role="alert"></p><button type="submit">Join</button></form></div>`;
+    redraw = () => {
+    const was = $("#cv") ? $("#cv").value : "";
+    app.innerHTML = wrap(`<div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div>
+      <form class="codein" id="cf"><label for="cv">${tt("typecode")}</label><input id="cv" dir="ltr" maxlength="4" autocomplete="off" autocapitalize="characters" value="${esc(was)}"><p class="cerr" id="ce" role="alert"></p><button type="submit">${tt("join")}</button></form>`);
     $("#cf").addEventListener("submit", e => { e.preventDefault(); const v = $("#cv").value.trim().toUpperCase(); if (/^[A-Z]{4}$/.test(v)){ location.hash = v; return; }
-      $("#ce").innerHTML = /^[0-9]+$/.test(v) ? `The code is 4 letters, not numbers. Are you the host? <a href="#host">Open the host screen</a>` : "The code is the 4 letters on the big screen."; $("#cv").select(); });
-    return;
+      $("#ce").innerHTML = /^[0-9]+$/.test(v) ? `${tt("codenum")} <a href="#host">${tt("openhost")}</a>` : tt("codebad"); $("#cv").select(); });
+    };
+    redraw(); return;
   }
   const id = store.sget("rq-id") || Math.random().toString(36).slice(2, 10); store.sset("rq-id", id);
-  let me = store.get("rq-me") || "", S = null, gotAt = 0, recvAt = 0, filter = "", lastKey = "";
+  let me = store.get("rq-me") || "", S = null, gotAt = 0, recvAt = 0, filter = "", lastKey = "", slow = false;
   let mine = {}; try { mine = JSON.parse(store.sget("rq-mine") || "{}"); } catch (e){}
   const net = makeNet(ROOM(code), false);
   const ping = () => net.send("action", {type: "ping", id, name: me});
@@ -1069,8 +1130,10 @@ function phoneMain(){
     locking = false;
   }
 
+  redraw = () => { lastKey = ""; render(); };
+  langDone = () => { if (me) store.set("rq-langok", me); };
   const myGroup = () => S && S.groups.find(g => g.members.includes(me));
-  function choose(name){ me = name; store.set("rq-me", name); ping(); lastKey = ""; render(); }
+  function choose(name){ me = name; langOpen = false; store.del("rq-langok"); store.set("rq-me", name); ping(); lastKey = ""; render(); }
   function answer(qid, c){
     if (mine[qid] !== undefined) return;
     mine[qid] = c; store.sset("rq-mine", JSON.stringify(mine));
@@ -1086,84 +1149,91 @@ function phoneMain(){
   }, 500);
 
   function head(sub){
-    return `<div class="me">${av(me)}<div class="nm"><strong>${esc(shown(me))}</strong><small>${esc(sub)}</small></div><button class="sw" data-act="switch">Not you?</button></div>`;
+    return `<div class="me">${av(me)}<div class="nm"><strong>${esc(shown(me))}</strong><small>${esc(sub)}</small></div><button class="sw" data-act="switch">${tt("notyou")}</button></div>${langsel()}`;
   }
   function buttons(opts, state){
-    return `<div class="btns">${opts.map((o, d) => `<button class="btn${state(d)}" data-act="ans" data-c="${d}"${state.locked ? " disabled" : ""}><b>${LETTERS[d]}</b><span>${esc(o)}</span></button>`).join("")}</div>`;
+    return `<div class="btns">${opts.map((o, d) => `<button class="btn${state(d)}" data-act="ans" data-c="${d}"${state.locked ? " disabled" : ""}><b>${LETTERS[d]}</b><span dir="auto">${esc(o)}</span></button>`).join("")}</div>`;
   }
   function render(){
-    if (!S){ app.innerHTML = `<div class="phone"><div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div><div class="card"><h2>Connecting…</h2><p>Waiting for the big screen. Keep this page open.</p></div><div class="card" id="slow" hidden><p>The big screen isn’t answering. Is ${esc(code)} the code it shows?</p><button class="pbtn" data-act="recode">Type another code</button></div></div>`; return; }
+    if (!S){ app.innerHTML = wrap(`<div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div><div class="card"><h2>${tt("connecting")}</h2><p>${tt("waiting")}</p></div><div class="card" id="slow"${slow ? "" : " hidden"}><p>${tt("slow", esc(code))}</p><button class="pbtn" data-act="recode">${tt("recode")}</button></div>`); return; }
     const g = myGroup();
     if (!me || !g) return pickName();
-    const P = S.phase, key = JSON.stringify([P, me, S.cur && [S.cur.qid, S.cur.answered.includes(me), S.cur.correct], S.brk && [S.brk.r, S.brk.done], S.fin && [S.fin.qid, S.fin.pick, S.fin.paused, S.fin.correct], S.fidx, mine[(S.cur || S.fin || {}).qid], S.results]);
+    if (store.get("rq-langok") !== me) return pickLang();
+    const P = S.phase, key = JSON.stringify([P, me, !!(S.cur || S.fin || {}).tr, S.cur && [S.cur.qid, S.cur.answered.includes(me), S.cur.correct], S.brk && [S.brk.r, S.brk.done], S.fin && [S.fin.qid, S.fin.pick, S.fin.paused, S.fin.correct], S.fidx, mine[(S.cur || S.fin || {}).qid], S.results]);
     if (key === lastKey){ tickTimer(); return; }
     lastKey = key;
-    const sub = `Group ${g.g + 1} · ${g.name}`;
+    const sub = `${tt("group", g.g + 1)} · ${g.name}`;
     let html = head(sub);
     if ((P === "q" || P === "reveal") && S.cur){
-      const c = S.cur, my = mine[c.qid];
-      html += `<div class="pq"><span>Round ${c.r + 1} · question ${c.i + 1} of ${c.n}</span>${P === "q" ? `<span class="tm" data-tm></span>` : ""}</div><p class="ptxt">${esc(c.text)}</p>`;
+      const c = S.cur, my = mine[c.qid], L = inLang(c);
+      html += `<div class="pq"><span>${tt("roundq", c.r + 1, c.i + 1, c.n)}</span>${P === "q" ? `<span class="tm" data-tm></span>` : ""}</div><p class="ptxt" dir="auto">${esc(L.text)}</p>`;
       const locked = my !== undefined || P === "reveal";
       const st = d => P === "reveal" ? (d === c.correct ? " right" : d === my ? " wrong" : " dim") : (d === my ? " sel" : my !== undefined ? " dim" : "");
       st.locked = locked;
-      html += buttons(c.opts, st);
-      if (P === "q") html += `<div class="note${my === undefined ? " soft" : ""}">${my === undefined ? "Tap your answer. You can’t change it." : c.answered.includes(me) ? `Locked in · ${LETTERS[my]}` : "Sending…"}</div>`;
+      html += buttons(L.opts, st);
+      if (P === "q") html += `<div class="note${my === undefined ? " soft" : ""}">${my === undefined ? tt("tap") : c.answered.includes(me) ? tt("locked", LETTERS[my]) : tt("sending")}</div>`;
       else {
         const got = my !== undefined && c.answered.includes(me);
-        html += `<div class="note ${got && my === c.correct ? "good" : "bad"}">${!got ? (my === undefined ? "No answer this time" : "Your answer arrived too late") : my === c.correct ? "Correct!" : `Not this time · it was ${LETTERS[c.correct]}`} · ${(c.score && c.score[me]) || 0} right this round</div>`;
+        html += `<div class="note ${got && my === c.correct ? "good" : "bad"}">${!got ? (my === undefined ? tt("noans") : tt("late")) : my === c.correct ? tt("correct") : tt("notthis", LETTERS[c.correct])} · ${tt("right", (c.score && c.score[me]) || 0)}</div>`;
       }
-      if (P === "reveal" && c.why) html += `<div class="pwhy"><b>Did you know?</b>${esc(c.why)}</div>`;
+      if (P === "reveal" && c.why) html += `<div class="pwhy"><b>${tt("dyk")}</b><span dir="ltr" lang="en" style="display:block">${esc(c.why)}</span></div>`;
     } else if (P === "break" && S.brk){
       const b = S.brk, gi = b.groups.findIndex(x => x.g === g.g), G = b.groups[gi], pos = G ? G.people.findIndex(p => p[0] === me) : -1;
       const last = b.done || b.r >= ROUNDS, w = S.results[g.g] && S.results[g.g].winner;
-      html += `<div class="card"><div class="eyebrow">${last ? "After the last round" : `After round ${b.r} of ${ROUNDS}`}</div>
-        ${last ? (w === me ? `<h2>You won your group!</h2><p>See you in the final.</p>` : w ? `<h2>${esc(shown(w))} goes to the final</h2>` : "") : ""}
-        ${pos >= 0 ? `<div class="big">${G.people[pos][1]}/${b.asked}</div><p>You are number ${pos + 1} of ${G.people.length} in your group. Your group is number ${gi + 1} of ${b.groups.length}.</p>` : `<p>No answers from you yet. Join the next round!</p>`}</div>`;
-      if (!last || b.clock) html += `<div class="card brk"><h2 data-bk></h2><p>${last ? "The final is next. " : ""}Keep this page, or scan the code again when you’re back.</p></div>`;
-      if (G && G.people.length) html += `<div class="who-list"><div><h3>Your group</h3><ul class="mini">${G.people.map(([n, sc], i) => `<li class="${n === me ? "mine" : ""}">${i + 1}. ${av(n)}<span>${esc(shown(n))}</span><b>${sc}</b></li>`).join("")}</ul></div></div>`;
-      html += `<div class="who-list"><div><h3>All groups · average right answers</h3><ul class="mini">${b.groups.map((x, i) => `<li class="${x.g === g.g ? "mine" : ""}">${i + 1}. <span>${esc(x.name)}</span><b>${x.avg.toFixed(1)}</b></li>`).join("")}</ul></div></div>`;
+      html += `<div class="card"><div class="eyebrow">${last ? tt("afterlast") : tt("after", b.r, ROUNDS)}</div>
+        ${last ? (w === me ? `<h2>${tt("youwon")}</h2><p>${tt("seefinal")}</p>` : w ? `<h2>${tt("goes", esc(shown(w)))}</h2>` : "") : ""}
+        ${pos >= 0 ? `<div class="big">${G.people[pos][1]}/${b.asked}</div><p>${tt("place", pos + 1, G.people.length, gi + 1, b.groups.length)}</p>` : `<p>${tt("none")}</p>`}</div>`;
+      if (!last || b.clock) html += `<div class="card brk"><h2 data-bk></h2><p>${last ? tt("finalnext") + " " : ""}${tt("keep")}</p></div>`;
+      if (G && G.people.length) html += `<div class="who-list"><div><h3>${tt("yourgroup")}</h3><ul class="mini">${G.people.map(([n, sc], i) => `<li class="${n === me ? "mine" : ""}">${i + 1}. ${av(n)}<span>${esc(shown(n))}</span><b>${sc}</b></li>`).join("")}</ul></div></div>`;
+      html += `<div class="who-list"><div><h3>${tt("allgroups")}</h3><ul class="mini">${b.groups.map((x, i) => `<li class="${x.g === g.g ? "mine" : ""}">${i + 1}. <span>${esc(x.name)}</span><b>${x.avg.toFixed(1)}</b></li>`).join("")}</ul></div></div>`;
     } else if (["fq", "flock", "freveal"].includes(P) && S.fin){
-      const f = S.fin, mineTurn = f.name === me, my = mine[f.qid];
-      html += `<div class="pq"><span>${mineTurn ? `Your question ${f.rung + 1} · ${fmt(LADDER[f.rung])} pts` : `${esc(firstName(f.name))} · question ${f.rung + 1}`}</span>${P === "fq" ? `<span class="tm" data-tm></span>` : ""}</div><p class="ptxt">${esc(f.text)}</p>`;
+      const f = S.fin, mineTurn = f.name === me, my = mine[f.qid], L = inLang(f);
+      html += `<div class="pq"><span>${mineTurn ? tt("yourq", f.rung + 1, fmt(LADDER[f.rung])) : tt("theirq", esc(firstName(f.name)), f.rung + 1)}</span>${P === "fq" ? `<span class="tm" data-tm></span>` : ""}</div><p class="ptxt" dir="auto">${esc(L.text)}</p>`;
       if (mineTurn){
         const pick = f.pick !== null ? f.pick : my;
         const st = d => P === "freveal" ? (d === f.correct ? " right" : d === f.pick ? " wrong" : " dim") : (d === pick ? " sel" : pick !== undefined && pick !== null ? " dim" : "");
         st.locked = (pick !== undefined && pick !== null) || P !== "fq";
-        html += buttons(f.opts, st);
-        html += `<div class="note${P === "freveal" ? (f.ok ? " good" : " bad") : ""}">${P === "freveal" ? (f.ok ? `Correct! ${fmt(f.points)} points` : `The climb ends on ${fmt(f.points)} points`) : f.paused && (pick === undefined || pick === null) ? "Ask the audience: listen to the room, then tap" : pick !== undefined && pick !== null ? `Locked in · ${LETTERS[pick]}` : "Tap your answer"}</div>`;
+        html += buttons(L.opts, st);
+        html += `<div class="note${P === "freveal" ? (f.ok ? " good" : " bad") : ""}">${P === "freveal" ? (f.ok ? tt("climbok", fmt(f.points)) : tt("climbend", fmt(f.points))) : f.paused && (pick === undefined || pick === null) ? tt("audience") : pick !== undefined && pick !== null ? tt("locked", LETTERS[pick]) : tt("tap2")}</div>`;
       } else if (P === "freveal") {
-        html += `<div class="note ${f.ok ? "good" : "bad"}">${f.ok ? "Correct!" : "Wrong answer."} The answer is ${LETTERS[f.correct]} · ${esc(f.opts[f.correct])}</div>`;
+        html += `<div class="note ${f.ok ? "good" : "bad"}">${f.ok ? tt("correct") : tt("wrong")} ${tt("answeris", LETTERS[f.correct], esc(L.opts[f.correct]))}</div>`;
       } else {
-        html += `<div class="card"><p>${f.paused ? `${esc(firstName(f.name))} is asking the audience. Give your advice out loud!` : "Watch the big screen."}</p></div>`;
+        html += `<div class="card"><p>${f.paused ? tt("asking", esc(firstName(f.name))) : tt("watch")}</p></div>`;
       }
-      if (P === "freveal" && f.why) html += `<div class="pwhy"><b>Did you know?</b>${esc(f.why)}</div>`;
+      if (P === "freveal" && f.why) html += `<div class="pwhy"><b>${tt("dyk")}</b><span dir="ltr" lang="en" style="display:block">${esc(f.why)}</span></div>`;
     } else if (P === "fintro" && S.forder){
       const next = S.forder[S.fidx];
-      html += `<div class="card"><div class="eyebrow">The final</div><h2>${next === me ? "You’re up next!" : esc(shown(next)) + " is up next"}</h2><p>${next === me ? "Get ready. The questions will appear here." : "Watch the big screen."}</p></div>`;
+      html += `<div class="card"><div class="eyebrow">${tt("final")}</div><h2>${next === me ? tt("upnext") : tt("isnext", esc(shown(next)))}</h2><p>${next === me ? tt("ready") : tt("watch")}</p></div>`;
       if (S.stand) html += standList();
     } else if (P === "champion" && S.stand){
       const w = S.stand[0];
-      html += `<div class="card"><div class="eyebrow">Champion</div><h2>${w.name === me ? "You won the Big RAS Quiz!" : esc(shown(w.name))}</h2><p>${fmt(w.points)} points</p></div>${standList()}`;
+      html += `<div class="card"><div class="eyebrow">${tt("champ")}</div><h2>${w.name === me ? tt("wonquiz") : esc(shown(w.name))}</h2><p>${tt("points", fmt(w.points))}</p></div>${standList()}`;
     } else {
-      html += `<div class="card"><h2>You’re in</h2><p>Everyone plays at the same time: ${ROUNDS} rounds of ${ROUND_LEVELS.length} questions, with a break after each one. Keep this page open; questions appear here.</p></div>`;
+      html += `<div class="card"><h2>${tt("youin")}</h2><p>${tt("intro", ROUNDS, ROUND_LEVELS.length)}</p></div>`;
     }
     html += `<div class="status" id="st"></div>`;
-    app.innerHTML = `<div class="phone">${html}</div>`;
+    app.innerHTML = wrap(html);
     tickTimer();
   }
   function standList(){ return `<ul class="mini">${S.stand.map((s, i) => `<li class="${s.name === me ? "mine" : ""}">${i + 1}. ${av(s.name)}<span>${esc(shown(s.name))}</span><b>${fmt(s.points)}</b></li>`).join("")}</ul>`; }
+  function pickLang(){
+    if (lastKey === "lang") return;
+    lastKey = "lang";
+    app.innerHTML = wrap(`<div class="me">${av(me)}<div class="nm"><strong>${esc(shown(me))}</strong></div><button class="sw" data-act="switch">${tt("notyou")}</button></div>
+      <h1>Choose your language</h1>${langs()}`);
+  }
   function pickName(){
-    if (!S.groups.length){ app.innerHTML = `<div class="phone"><div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div><div class="card"><h2>Almost ready</h2><p>The host hasn’t loaded the groups yet. Keep this page open.</p></div></div>`; lastKey = ""; return; }
+    if (!S.groups.length){ app.innerHTML = wrap(`<div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div><div class="card"><h2>${tt("almost")}</h2><p>${tt("nogroups")}</p></div>`); lastKey = ""; return; }
     if (lastKey === "pick:" + S.groups.length) return;
     lastKey = "pick:" + S.groups.length;
-    app.innerHTML = `<div class="phone"><div><div class="eyebrow">The Big RAS Quiz</div><h1>Who are you?</h1></div>
-      <input class="find" id="find" placeholder="Search your name" autocomplete="off" value="${esc(filter)}" aria-label="Search your name">
-      <div class="who-list" id="wl"></div></div>`;
+    app.innerHTML = wrap(`<div><div class="eyebrow">The Big RAS Quiz</div><h1>${tt("who")}</h1></div>
+      <input class="find" id="find" placeholder="${tt("search")}" autocomplete="off" value="${esc(filter)}" aria-label="${tt("search")}">
+      <div class="who-list" id="wl"></div>`);
     const draw = () => {
       const f = filter.trim().toLowerCase();
       $("#wl").innerHTML = S.groups.map(g => {
         const ms = g.members.filter(m => !f || shown(m).toLowerCase().includes(f));
-        return ms.length ? `<div><h3>Group ${g.g + 1} · ${esc(g.name)}</h3><div class="names">${ms.map(m => `<button class="nbtn" data-act="pick" data-name="${esc(m)}">${av(m)}<span>${esc(shown(m))}</span></button>`).join("")}</div></div>` : "";
+        return ms.length ? `<div><h3>${tt("group", g.g + 1)} · ${esc(g.name)}</h3><div class="names">${ms.map(m => `<button class="nbtn" data-act="pick" data-name="${esc(m)}">${av(m)}<span>${esc(shown(m))}</span></button>`).join("")}</div></div>` : "";
       }).join("");
     };
     draw();
@@ -1173,16 +1243,16 @@ function phoneMain(){
     const el = $("[data-tm]"), st = $("#st"), bk = $("[data-bk]");
     if (bk && S && S.brk){
       const left = S.brk.left - (Date.now() - recvAt);
-      bk.textContent = left <= 0 ? (S.brk.done || S.brk.r >= ROUNDS ? "The final starts soon" : "We’re starting again") : `Break · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")} left`;
+      bk.textContent = left <= 0 ? (S.brk.done || S.brk.r >= ROUNDS ? tt("finalsoon") : tt("again")) : tt("brk", `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}`);
     }
     if (el && S){
       const base = S.cur && S.phase === "q" ? S.cur.remain : S.fin ? S.fin.remain : 0;
       const paused = S.fin && S.fin.paused;
       const remain = paused ? base : Math.max(0, base - (Date.now() - recvAt));
-      el.textContent = paused ? "paused" : Math.ceil(remain / 1000) + "s";
+      el.textContent = paused ? tt("paused") : tt("sec", Math.ceil(remain / 1000));
       el.classList.toggle("low", !paused && remain <= 5000);
     }
-    if (st){ const stale = Date.now() - gotAt > 7000; st.textContent = stale ? "Lost contact with the big screen. Reconnecting…" : ""; st.classList.toggle("warn", stale); }
+    if (st){ const stale = Date.now() - gotAt > 7000; st.textContent = stale ? tt("lost") : ""; st.classList.toggle("warn", stale); }
   }
   setInterval(tickTimer, 250);
   app.addEventListener("click", e => {
@@ -1197,7 +1267,7 @@ function phoneMain(){
     }
   });
   render();
-  setTimeout(() => { const el = $("#slow"); if (el && !S) el.hidden = false; }, 8000);
+  setTimeout(() => { slow = true; const el = $("#slow"); if (el && !S) el.hidden = false; }, 8000);
 }
 </script>
 </body>
