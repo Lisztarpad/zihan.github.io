@@ -293,6 +293,9 @@ button.a{cursor:pointer}
 .nbtn span:last-child{min-width:0;overflow-wrap:anywhere}
 .codein{display:grid;gap:12px}
 .codein input{font:800 40px/1 var(--display);letter-spacing:.35em;text-align:center;text-transform:uppercase;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--tile2);color:var(--ink);width:100%}
+.cerr{margin:0;color:var(--bad-hi);font-weight:600}
+.cerr:empty{display:none}
+.cerr a{color:var(--amber)}
 .codein button,.pbtn{border:0;border-radius:999px;padding:16px;font:800 18px/1 var(--body);background:var(--amber);color:var(--amber-ink);cursor:pointer}
 .status{font:600 13px/1.3 var(--body);color:var(--soft);text-align:center}
 .status.warn{color:var(--bad-hi)}
@@ -437,6 +440,8 @@ function confetti(){
   })(t0);
 }
 
+// the page decides once what it is, so a new #code or #host in the address needs a fresh start
+addEventListener("hashchange", () => location.reload());
 if (location.hash === "#host") hostMain(); else phoneMain();
 
 /* ======================================================================
@@ -1029,8 +1034,9 @@ function phoneMain(){
   let code = (location.hash.slice(1) || "").toUpperCase();
   if (!/^[A-Z]{4}$/.test(code)){
     app.innerHTML = `<div class="phone"><div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div>
-      <form class="codein" id="cf"><label for="cv">Type the code from the big screen</label><input id="cv" maxlength="4" autocomplete="off" autocapitalize="characters"><button type="submit">Join</button></form></div>`;
-    $("#cf").addEventListener("submit", e => { e.preventDefault(); const v = $("#cv").value.trim().toUpperCase(); if (/^[A-Z]{4}$/.test(v)){ location.hash = v; location.reload(); } });
+      <form class="codein" id="cf"><label for="cv">Type the code from the big screen</label><input id="cv" maxlength="4" autocomplete="off" autocapitalize="characters"><p class="cerr" id="ce" role="alert"></p><button type="submit">Join</button></form></div>`;
+    $("#cf").addEventListener("submit", e => { e.preventDefault(); const v = $("#cv").value.trim().toUpperCase(); if (/^[A-Z]{4}$/.test(v)){ location.hash = v; return; }
+      $("#ce").innerHTML = /^[0-9]+$/.test(v) ? `The code is 4 letters, not numbers. Are you the host? <a href="#host">Open the host screen</a>` : "The code is the 4 letters on the big screen."; $("#cv").select(); });
     return;
   }
   const id = store.sget("rq-id") || Math.random().toString(36).slice(2, 10); store.sset("rq-id", id);
@@ -1086,7 +1092,7 @@ function phoneMain(){
     return `<div class="btns">${opts.map((o, d) => `<button class="btn${state(d)}" data-act="ans" data-c="${d}"${state.locked ? " disabled" : ""}><b>${LETTERS[d]}</b><span>${esc(o)}</span></button>`).join("")}</div>`;
   }
   function render(){
-    if (!S){ app.innerHTML = `<div class="phone"><div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div><div class="card"><h2>Connecting…</h2><p>Waiting for the big screen. Keep this page open.</p></div></div>`; return; }
+    if (!S){ app.innerHTML = `<div class="phone"><div><div class="eyebrow">RAS Team Retreat</div><h1>The Big RAS Quiz</h1></div><div class="card"><h2>Connecting…</h2><p>Waiting for the big screen. Keep this page open.</p></div><div class="card" id="slow" hidden><p>The big screen isn’t answering. Is ${esc(code)} the code it shows?</p><button class="pbtn" data-act="recode">Type another code</button></div></div>`; return; }
     const g = myGroup();
     if (!me || !g) return pickName();
     const P = S.phase, key = JSON.stringify([P, me, S.cur && [S.cur.qid, S.cur.answered.includes(me), S.cur.correct], S.brk && [S.brk.r, S.brk.done], S.fin && [S.fin.qid, S.fin.pick, S.fin.paused, S.fin.correct], S.fidx, mine[(S.cur || S.fin || {}).qid], S.results]);
@@ -1181,6 +1187,7 @@ function phoneMain(){
   setInterval(tickTimer, 250);
   app.addEventListener("click", e => {
     const el = e.target.closest("[data-act]"); if (!el || el.disabled) return;
+    if (el.dataset.act === "recode"){ location.hash = ""; return; }
     if (el.dataset.act === "pick") choose(el.dataset.name);
     if (el.dataset.act === "switch"){ me = ""; store.del("rq-me"); ping(); lastKey = ""; render(); }
     if (el.dataset.act === "ans" && S){
@@ -1190,6 +1197,7 @@ function phoneMain(){
     }
   });
   render();
+  setTimeout(() => { const el = $("#slow"); if (el && !S) el.hidden = false; }, 8000);
 }
 </script>
 </body>
