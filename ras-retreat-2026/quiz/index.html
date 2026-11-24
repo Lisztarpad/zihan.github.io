@@ -717,7 +717,7 @@ function startHost(pin, loaded){
     }
     if (H.phase === "break"){
       const st = standGroups();
-      S.brk = {r: H.rounds.length, asked: st.asked, left: H.rounds.length < ROUNDS ? Math.max(0, H.breakEnd - Date.now()) : 0, done: !!Object.keys(H.results).length,
+      S.brk = {r: H.rounds.length, asked: st.asked, clock: !H.final, left: H.final ? 0 : Math.max(0, H.breakEnd - Date.now()), done: !!Object.keys(H.results).length,
         groups: st.map(g => ({g: g.g, name: g.name, avg: +g.avg.toFixed(1), move: g.move || 0, people: g.people.map(p => [p.name, p.s])}))};
     }
     if (H.final){
@@ -771,7 +771,7 @@ function startHost(pin, loaded){
     else if (P === "break"){
       const more = H.rounds.length < ROUNDS && !Object.keys(H.results).length;
       body = H.view === "people" ? peopleView() : groupsView();
-      ctl = (more ? `<button class="cbtn" data-act="plus">+1 min</button>` : "")
+      ctl = (!H.final ? `<button class="cbtn" data-act="plus">+1 min</button>` : "")
         + (H.view === "people" ? `<button class="cbtn" data-act="vgroups">Group ranking</button>${more ? go(`Start round ${H.rounds.length + 1}`) : `<button class="cbtn primary" data-act="final"${finalists().length ? "" : " disabled"}>Start the final</button>`}`
         : `<button class="cbtn primary" data-act="vpeople">Inside the groups <kbd>↵</kbd></button>`);
     }
@@ -862,13 +862,13 @@ function startHost(pin, loaded){
   }
   function whyPanel(text){ return `<div class="dyk"><div class="lab">Did you know?</div><div class="txt">${esc(text)}</div></div>`; }
   function breakText(){
-    const left = H.breakEnd - Date.now();
-    return left <= 0 ? "We’re starting again" : `Break · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}`;
+    const left = H.breakEnd - Date.now(), more = H.rounds.length < ROUNDS && !Object.keys(H.results).length;
+    return left <= 0 ? (more ? "We’re starting again" : "The final starts soon") : `Break · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}`;
   }
   function breakTop(title){
     const more = H.rounds.length < ROUNDS && !Object.keys(H.results).length;
-    return `<div class="top"><div class="bhead"><div class="qn">${more ? `After round ${H.rounds.length} of ${ROUNDS}` : "After the last round"}</div><h2>${title}</h2></div>
-      ${more ? `<div class="bk" data-bk>${breakText()}</div>` : `<div class="bk">Next: the final</div>`}</div>`;
+    return `<div class="top"><div class="bhead"><div class="qn">${more ? `After round ${H.rounds.length} of ${ROUNDS}` : `After the last round${H.final ? "" : " · next: the final"}`}</div><h2>${title}</h2></div>
+      ${H.final ? "" : `<div class="bk" data-bk>${breakText()}</div>`}</div>`;
   }
   const moveTag = m => m > 0 ? `<span class="mv up">▲ ${m}</span>` : m < 0 ? `<span class="mv down">▼ ${-m}</span>` : `<span class="mv"></span>`;
   function groupsView(){
@@ -1007,7 +1007,7 @@ function startHost(pin, loaded){
   app.addEventListener("click", e => { const el = e.target.closest("[data-act]"); if (el && !el.disabled) act(el.dataset.act, el); });
   document.addEventListener("keydown", e => {
     if (document.querySelector(".modal") || e.target.matches("input,textarea")) return;
-    if (e.key === "Enter" || e.key === "ArrowRight"){ const b = $(".ctl .cbtn.primary:not(:disabled)") || (H.phase === "q" ? $('.ctl [data-act="reveal"]') : null); if (b){ e.preventDefault(); b.click(); } }
+    if (e.key === "Enter" || e.key === "ArrowRight"){ const b = $('.ctl .cbtn.primary:not(:disabled):not([data-act="final"])') || (H.phase === "q" ? $('.ctl [data-act="reveal"]') : null); if (b){ e.preventDefault(); b.click(); } }
     if (e.key === "Escape" && menuOpen){ menuOpen = false; render(); }
   });
   // Pick up a new deal right away: the dealing page writes to localStorage, which fires "storage" in this tab.
@@ -1119,7 +1119,7 @@ function phoneMain(){
       html += `<div class="card"><div class="eyebrow">${last ? "After the last round" : `After round ${b.r} of ${ROUNDS}`}</div>
         ${last ? (w === me ? `<h2>You won your group!</h2><p>See you in the final.</p>` : w ? `<h2>${esc(shown(w))} goes to the final</h2>` : "") : ""}
         ${pos >= 0 ? `<div class="big">${G.people[pos][1]}/${b.asked}</div><p>You are number ${pos + 1} of ${G.people.length} in your group. Your group is number ${gi + 1} of ${b.groups.length}.</p>` : `<p>No answers from you yet. Join the next round!</p>`}</div>`;
-      if (!last) html += `<div class="card brk"><h2 data-bk></h2><p>Keep this page, or scan the code again when you’re back.</p></div>`;
+      if (!last || b.clock) html += `<div class="card brk"><h2 data-bk></h2><p>${last ? "The final is next. " : ""}Keep this page, or scan the code again when you’re back.</p></div>`;
       if (G && G.people.length) html += `<div class="who-list"><div><h3>Your group</h3><ul class="mini">${G.people.map(([n, sc], i) => `<li class="${n === me ? "mine" : ""}">${i + 1}. ${av(n)}<span>${esc(shown(n))}</span><b>${sc}</b></li>`).join("")}</ul></div></div>`;
       html += `<div class="who-list"><div><h3>All groups · average right answers</h3><ul class="mini">${b.groups.map((x, i) => `<li class="${x.g === g.g ? "mine" : ""}">${i + 1}. <span>${esc(x.name)}</span><b>${x.avg.toFixed(1)}</b></li>`).join("")}</ul></div></div>`;
     } else if (["fq", "flock", "freveal"].includes(P) && S.fin){
@@ -1173,7 +1173,7 @@ function phoneMain(){
     const el = $("[data-tm]"), st = $("#st"), bk = $("[data-bk]");
     if (bk && S && S.brk){
       const left = S.brk.left - (Date.now() - recvAt);
-      bk.textContent = left <= 0 ? "We’re starting again" : `Break · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")} left`;
+      bk.textContent = left <= 0 ? (S.brk.done || S.brk.r >= ROUNDS ? "The final starts soon" : "We’re starting again") : `Break · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")} left`;
     }
     if (el && S){
       const base = S.cur && S.phase === "q" ? S.cur.remain : S.fin ? S.fin.remain : 0;
